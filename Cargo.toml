@@ -21,3 +21,5 @@ hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
 image = "0.23.14"
 imageproc = "0.22.0"
+rand = "0.8.4"
+indexmap = "1.8.0"
