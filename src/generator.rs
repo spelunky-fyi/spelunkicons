@@ -11,7 +11,7 @@ use crate::constants::{IMAGE_HEIGHT, IMAGE_WIDTH};
 use crate::sheets::{Biome, GenKind, GenSheet, Sheets};
 use crate::spelunkicon::Spelunkicon;
 
-const OUTPUT_DIMENSION: u32 = 500;
+const OUTPUT_DIMENSION: u32 = 250;
 
 pub struct Generator {
     pub sheets: Sheets,
