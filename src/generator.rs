@@ -1,85 +1,77 @@
-use image::imageops::overlay;
+use image::imageops::{resize, FilterType};
 use image::png::PngEncoder;
-use image::GenericImageView;
-use image::ImageFormat::Png;
-use image::{load_from_memory_with_format, DynamicImage, ImageBuffer, RgbaImage};
-use indexmap::{indexmap, IndexMap};
+use image::{ImageBuffer, RgbaImage};
+use indexmap::indexmap;
+use indexmap::IndexMap;
 use rand::prelude::StdRng;
 use rand::prelude::*;
 use rand::SeedableRng;
 
-use crate::pngs;
+use crate::constants::{IMAGE_HEIGHT, IMAGE_WIDTH};
+use crate::sheets::{Biome, GenKind, GenSheet, Sheets};
 use crate::spelunkicon::Spelunkicon;
 
-const NUM_ROWS: usize = 6;
-const NUM_COLS: usize = 6;
-
-const TILE_WIDTH: u32 = 128;
-const TILE_HEIGHT: u32 = 128;
-const IMAGE_WIDTH: u32 = TILE_WIDTH * NUM_ROWS as u32;
-const IMAGE_HEIGHT: u32 = TILE_HEIGHT * NUM_COLS as u32;
+const OUTPUT_DIMENSION: u32 = 500;
 
 pub struct Generator {
-    pub sheets: IndexMap<String, DynamicImage>,
+    pub sheets: Sheets,
+    pub sheet_gens: IndexMap<&'static str, GenSheet>,
 }
 
 impl Generator {
     pub fn new() -> Self {
-        let sheets = indexmap! {
-            String::from("CAVE_FLOOR") => load_from_memory_with_format(pngs::FLOOR_CAVE, Png).unwrap(),
-            String::from("CAVE_JUNGLE") => load_from_memory_with_format(pngs::FLOOR_JUNGLE, Png).unwrap(),
-            String::from("FLOOR_BABYLON") => load_from_memory_with_format(pngs::FLOOR_BABYLON, Png).unwrap(),
-            String::from("FLOOR_EGGPLANT") => load_from_memory_with_format(pngs::FLOOR_EGGPLANT, Png).unwrap(),
-            String::from("FLOOR_ICE") => load_from_memory_with_format(pngs::FLOOR_ICE, Png).unwrap(),
-            String::from("FLOOR_SUNKEN") => load_from_memory_with_format(pngs::FLOOR_SUNKEN, Png).unwrap(),
-            String::from("FLOOR_SURFACE") => load_from_memory_with_format(pngs::FLOOR_SURFACE, Png).unwrap(),
-            String::from("FLOOR_TEMPLE") => load_from_memory_with_format(pngs::FLOOR_TEMPLE, Png).unwrap(),
-            String::from("FLOOR_TIDEPOOL") => load_from_memory_with_format(pngs::FLOOR_TIDEPOOL, Png).unwrap(),
-            String::from("FLOOR_VOLCANO") => load_from_memory_with_format(pngs::FLOOR_VOLCANO, Png).unwrap(),
-            // String::from("FLOORSTYLED_BABYLON") => load_from_memory_with_format(pngs::FLOORSTYLED_BABYLON, Png).unwrap(),
-            // String::from("FLOORSTYLED_BEEHIVE") => load_from_memory_with_format(pngs::FLOORSTYLED_BEEHIVE, Png).unwrap(),
-            // String::from("FLOORSTYLED_DUAT") => load_from_memory_with_format(pngs::FLOORSTYLED_DUAT, Png).unwrap(),
-            // String::from("FLOORSTYLED_GOLD") => load_from_memory_with_format(pngs::FLOORSTYLED_GOLD, Png).unwrap(),
-            // String::from("FLOORSTYLED_GUTS") => load_from_memory_with_format(pngs::FLOORSTYLED_GUTS, Png).unwrap(),
-            // String::from("FLOORSTYLED_MOTHERSHIP") => load_from_memory_with_format(pngs::FLOORSTYLED_MOTHERSHIP, Png).unwrap(),
-            // String::from("FLOORSTYLED_PAGODA") => load_from_memory_with_format(pngs::FLOORSTYLED_PAGODA, Png).unwrap(),
-            // String::from("FLOORSTYLED_PALACE") => load_from_memory_with_format(pngs::FLOORSTYLED_PALACE, Png).unwrap(),
-            // String::from("FLOORSTYLED_STONE") => load_from_memory_with_format(pngs::FLOORSTYLED_STONE, Png).unwrap(),
-            // String::from("FLOORSTYLED_SUNKEN") => load_from_memory_with_format(pngs::FLOORSTYLED_SUNKEN, Png).unwrap(),
-            // String::from("FLOORSTYLED_TEMPLE") => load_from_memory_with_format(pngs::FLOORSTYLED_TEMPLE, Png).unwrap(),
-            // String::from("FLOORSTYLED_VLAD") => load_from_memory_with_format(pngs::FLOORSTYLED_VLAD, Png).unwrap(),
-            // String::from("FLOORSTYLED_WOOD") => load_from_memory_with_format(pngs::FLOORSTYLED_WOOD, Png).unwrap(),
-        };
-        Generator { sheets }
+        let sheet_gens = indexmap![
+            "FLOOR_CAVE"     => GenSheet::new(GenKind::Floor, Biome::Cave),
+            "FLOOR_JUNGLE"   => GenSheet::new(GenKind::Floor, Biome::Jungle),
+            "FLOOR_BABYLON"  => GenSheet::new(GenKind::Floor, Biome::Babylon),
+            "FLOOR_EGGPLANT" => GenSheet::new(GenKind::Floor, Biome::Eggplant),
+            "FLOOR_ICE"      => GenSheet::new(GenKind::Floor, Biome::Ice),
+            "FLOOR_SUNKEN"   => GenSheet::new(GenKind::Floor, Biome::Sunken),
+            "FLOOR_SURFACE"  => GenSheet::new(GenKind::Floor, Biome::Surface),
+            "FLOOR_TEMPLE"   => GenSheet::new(GenKind::Floor, Biome::Temple),
+            "FLOOR_TIDEPOOL" => GenSheet::new(GenKind::Floor, Biome::TidePool),
+            "FLOOR_VOLCANO"  => GenSheet::new(GenKind::Floor, Biome::Volcana),
+            // "FLOORSTYLED_BABYLON"    => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_BABYLON),
+            // "FLOORSTYLED_BEEHIVE"    => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_BEEHIVE),
+            // "FLOORSTYLED_DUAT"       => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_DUAT),
+            // "FLOORSTYLED_GOLD"       => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_GOLD),
+            // "FLOORSTYLED_GUTS"       => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_GUTS),
+            // "FLOORSTYLED_MOTHERSHIP" => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_MOTHERSHIP),
+            // "FLOORSTYLED_PAGODA"     => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_PAGODA),
+            // "FLOORSTYLED_PALACE"     => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_PALACE),
+            // "FLOORSTYLED_STONE"      => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_STONE),
+            // "FLOORSTYLED_SUNKEN"     => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_SUNKEN),
+            // "FLOORSTYLED_TEMPLE"     => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_TEMPLE),
+            // "FLOORSTYLED_VLAD"       => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_VLAD),
+            // "FLOORSTYLED_WOOD"       => Sheet::new(SheetKind::FloorStyled, pngs::FLOORSTYLED_WOOD),
+        ];
+        Generator {
+            sheets: Sheets::new(),
+            sheet_gens,
+        }
     }
 
     pub fn make_png(&self, config: Spelunkicon) -> Option<Vec<u8>> {
         // Generate Image
         let mut image: RgbaImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
         let mut rng = StdRng::seed_from_u64(config.hash as u64);
-        let sheet_idx = rng.gen::<usize>() % self.sheets.len();
+        let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
-        let (_, sheet) = self.sheets.get_index(sheet_idx).unwrap();
-        let tile = sheet.view(0, 0, TILE_WIDTH, TILE_HEIGHT);
+        let sheet = &self.sheet_gens[sheet_idx];
+        sheet.generate_image(&mut image, &self.sheets, &config, &mut rng);
 
-        for (row_idx, row) in config.grid.iter().enumerate() {
-            for (col_idx, col) in row.iter().enumerate() {
-                if *col {
-                    continue;
-                }
-                let x = col_idx as u32 * TILE_HEIGHT as u32;
-                let y = row_idx as u32 * TILE_WIDTH as u32;
-
-                overlay(&mut image, &tile, x, y);
-            }
-        }
-
+        let image = resize(
+            &image,
+            OUTPUT_DIMENSION,
+            OUTPUT_DIMENSION,
+            FilterType::Nearest,
+        );
         // Convert to PNG
         let mut out = Vec::new();
         let png = PngEncoder::new(&mut out).encode(
             image.as_raw(),
-            IMAGE_WIDTH,
-            IMAGE_HEIGHT,
+            OUTPUT_DIMENSION,
+            OUTPUT_DIMENSION,
             image::ColorType::Rgba8,
         );
 

@@ -4,6 +4,8 @@ pub mod pngs {
     include!(concat!(env!("OUT_DIR"), "/pngs.rs"));
 }
 
+pub mod constants;
 pub mod generator;
 pub mod service;
+pub mod sheets;
 pub mod spelunkicon;

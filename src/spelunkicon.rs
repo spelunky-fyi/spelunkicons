@@ -1,12 +1,7 @@
 use bitvec::order::Msb0;
 use bitvec::view::BitView;
 
-const NUM_ROWS: usize = 6;
-const NUM_COLS: usize = 6;
-
-// We're going to be mirroring the icon vertically
-// so we only care about half the columns.
-const NUM_BITS_NEEDED: usize = NUM_ROWS * (NUM_COLS / 2);
+use crate::constants::{NUM_BITS_NEEDED, NUM_COLS, NUM_ROWS};
 
 pub struct Spelunkicon {
     pub hash: u32,
