@@ -26,7 +26,7 @@ impl Spelunkicon {
             for col in row {
                 grid_row.push(*col);
             }
-            // Mirrow
+            // Mirror
             for col in row.iter().rev() {
                 grid_row.push(*col);
             }
