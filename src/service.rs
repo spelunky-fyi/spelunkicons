@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::future::Future;
 use std::path::PathBuf;
@@ -13,6 +14,8 @@ use crate::generator::Generator;
 use crate::spelunkicon::Spelunkicon;
 
 const MAX_INPUT: usize = 64;
+static VALID_SIZES: &[&str] = &["4", "6", "8"];
+static DEFAULT_SIZE: &str = "6";
 static PNG_SUFFIX: &str = ".png";
 
 pub struct IconService {
@@ -68,8 +71,28 @@ impl Service<Request<Body>> for IconService {
             return Box::pin(async { Ok(response) });
         }
 
+        let params: HashMap<String, String> = req
+            .uri()
+            .query()
+            .map(|v| {
+                url::form_urlencoded::parse(v.as_bytes())
+                    .into_owned()
+                    .collect()
+            })
+            .unwrap_or_else(HashMap::new);
+
+        let size = params
+            .get("size")
+            .cloned()
+            .unwrap_or(String::from(DEFAULT_SIZE));
+        if !VALID_SIZES.contains(&&size[..]) {
+            *response.status_mut() = StatusCode::BAD_REQUEST;
+            return Box::pin(async { Ok(response) });
+        }
+        let size = size.parse::<u8>().unwrap();
+
         // Generate the PNG
-        let config = Spelunkicon::from_input(&input);
+        let config = Spelunkicon::from_input(&input, size);
         let png = match self.generator.make_png(config) {
             Some(png) => png,
             None => {

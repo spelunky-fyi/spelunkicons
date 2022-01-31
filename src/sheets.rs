@@ -4,7 +4,7 @@ use image::{load_from_memory_with_format, DynamicImage, SubImage};
 use image::{GenericImageView, RgbaImage};
 use rand::prelude::*;
 
-use crate::constants::{NUM_COLS, NUM_ROWS, TILE_HEIGHT, TILE_WIDTH};
+use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
 use crate::pngs;
 use crate::spelunkicon::Spelunkicon;
 
@@ -105,7 +105,7 @@ impl GenSheet {
     }
 
     fn right_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_col == NUM_COLS - 1 {
+        if curr_col == config.height as usize - 1 {
             return false;
         }
 
@@ -121,7 +121,7 @@ impl GenSheet {
     }
 
     fn down_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_row >= NUM_ROWS - 1 {
+        if curr_row >= config.height as usize - 1 {
             return false;
         }
 

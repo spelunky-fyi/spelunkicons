@@ -12,12 +12,24 @@ struct Args {
     /// The input to find.
     #[clap(short, long)]
     input: String,
+
+    /// The size of the grid.
+    #[clap(short, long, default_value_t = 6)]
+    size: u8,
 }
 
 fn main() {
     let args = Args::parse();
-    if args.input.len() != 18 {
-        eprintln!("Input must be 18 characters");
+
+    if !&[4, 6, 8].contains(&args.size) {
+        eprintln!("Size must be one of 4, 6, or 8");
+        exit(1);
+    }
+
+    let bits_needed = args.size * (args.size / 2);
+
+    if args.input.len() != bits_needed as usize {
+        eprintln!("Input must be {} characters", bits_needed);
         exit(1)
     }
 

@@ -7,7 +7,7 @@ use rand::prelude::StdRng;
 use rand::prelude::*;
 use rand::SeedableRng;
 
-use crate::constants::{IMAGE_HEIGHT, IMAGE_WIDTH};
+use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
 use crate::sheets::{Biome, GenKind, GenSheet, Sheets};
 use crate::spelunkicon::Spelunkicon;
 
@@ -53,7 +53,11 @@ impl Generator {
 
     pub fn make_png(&self, config: Spelunkicon) -> Option<Vec<u8>> {
         // Generate Image
-        let mut image: RgbaImage = ImageBuffer::new(IMAGE_WIDTH, IMAGE_HEIGHT);
+
+        let image_height = config.height as u32 * TILE_HEIGHT;
+        let image_width = config.height as u32 * TILE_WIDTH;
+
+        let mut image: RgbaImage = ImageBuffer::new(image_width, image_height);
         let mut rng = StdRng::seed_from_u64(config.hash as u64);
         let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
