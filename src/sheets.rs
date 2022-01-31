@@ -151,13 +151,15 @@ impl GenSheet {
         let right_deco = vec![
             sheet_image.view(5 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
             sheet_image.view(6 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
-            sheet_image.view(7 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
         ];
+        let right_up_deco =
+            sheet_image.view(7 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+
         let left_deco = vec![
             flip_horizontal(&right_deco[0]),
             flip_horizontal(&right_deco[1]),
-            flip_horizontal(&right_deco[2]),
         ];
+        let left_up_deco = flip_horizontal(&right_up_deco);
 
         let up_deco = vec![
             sheet_image.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -194,21 +196,21 @@ impl GenSheet {
                 }
 
                 if self.left_empty(config, row_idx, col_idx) {
-                    overlay(
-                        base_image,
-                        left_deco.choose(rng).unwrap(),
-                        x - (TILE_WIDTH / 2) + 5,
-                        y,
-                    );
+                    let x = x - (TILE_WIDTH / 2) + 5;
+                    if self.up_empty(config, row_idx, col_idx) {
+                        overlay(base_image, &left_up_deco, x, y);
+                    } else {
+                        overlay(base_image, left_deco.choose(rng).unwrap(), x, y);
+                    }
                 }
 
                 if self.right_empty(config, row_idx, col_idx) {
-                    overlay(
-                        base_image,
-                        right_deco.choose(rng).unwrap(),
-                        x + (TILE_WIDTH / 2) - 5,
-                        y,
-                    );
+                    let x = x + (TILE_WIDTH / 2) - 5;
+                    if self.up_empty(config, row_idx, col_idx) {
+                        overlay(base_image, &right_up_deco, x, y);
+                    } else {
+                        overlay(base_image, right_deco.choose(rng).unwrap(), x, y);
+                    }
                 }
 
                 if self.up_empty(config, row_idx, col_idx) {
