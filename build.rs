@@ -43,7 +43,13 @@ fn main() {
 
     for (name, path) in PNGS {
         let path = textures_path.join(path);
-        let metadata = fs::metadata(&path).unwrap();
+        let metadata = fs::metadata(&path).unwrap_or_else(|err| {
+            panic!(
+                "Error loading metadata of file {}: {:?}",
+                path.to_string_lossy(),
+                err
+            )
+        });
 
         out_file
             .write(
