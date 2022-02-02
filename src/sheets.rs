@@ -190,11 +190,6 @@ impl GenSheet {
                 // Place down base tile
                 overlay(base_image, &tile, x, y);
 
-                // Place Gold
-                if rng.gen::<u32>() % 12 == 0 {
-                    overlay(base_image, crust_gold.choose(rng).unwrap(), x, y);
-                }
-
                 if self.left_empty(config, row_idx, col_idx) {
                     let x = x - (TILE_WIDTH / 2) + 5;
                     if self.up_empty(config, row_idx, col_idx) {
@@ -214,30 +209,22 @@ impl GenSheet {
                 }
 
                 if self.up_empty(config, row_idx, col_idx) {
+                    let y = y - (TILE_HEIGHT / 2) + 4;
                     if rng.gen::<u32>() % 12 == 0 {
-                        overlay(
-                            base_image,
-                            spikes_deco.choose(rng).unwrap(),
-                            x,
-                            y - (TILE_HEIGHT / 2) + 4,
-                        );
+                        overlay(base_image, spikes_deco.choose(rng).unwrap(), x, y);
                     } else {
-                        overlay(
-                            base_image,
-                            up_deco.choose(rng).unwrap(),
-                            x,
-                            y - (TILE_HEIGHT / 2) + 4,
-                        );
+                        overlay(base_image, up_deco.choose(rng).unwrap(), x, y);
                     }
                 }
 
                 if self.down_empty(config, row_idx, col_idx) {
-                    overlay(
-                        base_image,
-                        down_deco.choose(rng).unwrap(),
-                        x,
-                        y + (TILE_HEIGHT / 2) - 12,
-                    );
+                    let y = y + (TILE_HEIGHT / 2) - 12;
+                    overlay(base_image, down_deco.choose(rng).unwrap(), x, y);
+                }
+
+                // Place Gold
+                if rng.gen::<u32>() % 12 == 0 {
+                    overlay(base_image, crust_gold.choose(rng).unwrap(), x, y);
                 }
             }
         }
