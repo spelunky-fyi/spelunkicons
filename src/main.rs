@@ -24,6 +24,8 @@ async fn main() {
     let generator = Arc::new(Generator::new());
     let server = Server::bind(&addr).serve(MakeIconService { generator });
 
+    println!("Service is now ready...");
+
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);
     }

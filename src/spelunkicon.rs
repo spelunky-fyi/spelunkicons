@@ -2,14 +2,18 @@ use bitvec::order::Msb0;
 use bitvec::view::BitView;
 
 pub struct Spelunkicon {
-    pub height: u8,
+    pub grid_width: u8,
+    pub grid_height: u8,
     pub hash: u32,
     pub grid: Vec<Vec<bool>>,
 }
 
 impl Spelunkicon {
     pub fn from_input(input: &str, height: u8) -> Self {
-        let mut grid = Vec::with_capacity(height as usize);
+        let grid_width = height;
+        let grid_height = height;
+
+        let mut grid = Vec::with_capacity(grid_width as usize);
 
         let hash = crc32fast::hash(input.as_bytes());
         let bits_needed = height * (height / 2);
@@ -33,7 +37,12 @@ impl Spelunkicon {
             grid.push(grid_row);
         }
 
-        Spelunkicon { hash, height, grid }
+        Spelunkicon {
+            grid_height,
+            grid_width,
+            hash,
+            grid,
+        }
     }
 
     pub fn print_grid(&self) {
