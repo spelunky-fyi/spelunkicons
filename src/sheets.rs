@@ -223,7 +223,7 @@ impl GenSheet {
         let tile = self.base_tile(sheet_image);
 
         let mut placed_grid =
-            vec![vec![PlacedTile::None; config.grid_height as usize]; config.grid_width as usize];
+            vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize];
 
         for (row_idx, row) in config.grid.iter().enumerate() {
             for (col_idx, col) in row.iter().enumerate() {
@@ -237,7 +237,7 @@ impl GenSheet {
                 overlay(base_image, &tile, x, y);
 
                 // Mark that we placed a tile here
-                placed_grid[col_idx as usize][row_idx as usize] = PlacedTile::Floor;
+                placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::Floor;
             }
         }
 
@@ -292,7 +292,7 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[col_idx as usize][row_idx as usize] != PlacedTile::None {
+                if existing_grid[row_idx as usize][col_idx as usize] != PlacedTile::None {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
@@ -379,7 +379,7 @@ impl GenSheet {
 
         let has_existing_grid = existing_grid.is_some();
         let mut placed_grid = existing_grid.unwrap_or_else(|| {
-            vec![vec![PlacedTile::None; config.grid_height as usize]; config.grid_width as usize]
+            vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize]
         });
 
         if has_existing_grid {
@@ -394,7 +394,7 @@ impl GenSheet {
 
                     // Place down base tile
                     overlay(base_image, &tile, x, y);
-                    placed_grid[col_idx as usize][row_idx as usize] = PlacedTile::FloorStyled;
+                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
                 }
             }
         }
@@ -424,7 +424,7 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[col_idx as usize][row_idx as usize] != PlacedTile::None {
+                if existing_grid[row_idx as usize][col_idx as usize] != PlacedTile::None {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
