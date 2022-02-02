@@ -657,6 +657,21 @@ impl GenSheet {
                 .items
                 .view(TILE_WIDTH * 11, 0, TILE_WIDTH, TILE_HEIGHT),
         ];
+        let crust_jewels = vec![
+            sheets
+                .items
+                .view(TILE_WIDTH * 3, 0, TILE_WIDTH, TILE_HEIGHT),
+            sheets
+                .items
+                .view(TILE_WIDTH * 4, 0, TILE_WIDTH, TILE_HEIGHT),
+            sheets
+                .items
+                .view(TILE_WIDTH * 5, 0, TILE_WIDTH, TILE_HEIGHT),
+        ];
+        let crust_jetpack =
+            sheets
+                .items
+                .view(TILE_WIDTH * 9, TILE_HEIGHT * 2, TILE_WIDTH, TILE_HEIGHT);
 
         for (row_idx, row) in config.grid.iter().enumerate() {
             for (col_idx, col) in row.iter().enumerate() {
@@ -671,6 +686,10 @@ impl GenSheet {
                     // Place Gold
                     if rng.gen::<u32>() % 12 == 0 {
                         overlay(base_image, crust_gold.choose(rng).unwrap(), x, y);
+                    } else if rng.gen::<u32>() % 24 == 0 {
+                        overlay(base_image, crust_jewels.choose(rng).unwrap(), x, y);
+                    } else if rng.gen::<u32>() % 62000 == 0 {
+                        overlay(base_image, &crust_jetpack, x, y);
                     }
                 }
             }
