@@ -51,8 +51,8 @@ impl Generator {
     pub fn make_png(&self, config: Spelunkicon) -> Option<Vec<u8>> {
         // Generate Image
 
-        let image_height = config.height as u32 * TILE_HEIGHT;
-        let image_width = config.height as u32 * TILE_WIDTH;
+        let image_height = config.grid_height as u32 * TILE_HEIGHT;
+        let image_width = config.grid_width as u32 * TILE_WIDTH;
 
         let mut image: RgbaImage = ImageBuffer::new(image_width, image_height);
         let mut rng = StdRng::seed_from_u64(config.hash as u64);

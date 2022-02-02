@@ -2,7 +2,6 @@ use bitvec::order::Msb0;
 use bitvec::view::BitView;
 
 pub struct Spelunkicon {
-    pub height: u8,
     pub grid_width: u8,
     pub grid_height: u8,
     pub hash: u32,
@@ -39,7 +38,6 @@ impl Spelunkicon {
         }
 
         Spelunkicon {
-            height,
             grid_height,
             grid_width,
             hash,
