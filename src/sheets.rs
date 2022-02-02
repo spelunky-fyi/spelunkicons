@@ -147,13 +147,48 @@ pub enum GenSheet {
     FloorAndFloorStyled(Biome),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 enum PlacedTile {
     None,
     Floor,
     FloorStyled,
 }
 type PlacedTileGrid = Vec<Vec<PlacedTile>>;
+
+static DIR_LEFT: (i64, i64) = (-1, 0);
+//static DIR_UP_LEFT: (i64, i64) = (-1, -1);
+static DIR_UP: (i64, i64) = (0, -1);
+//static DIR_UP_RIGHT: (i64, i64) = (1, -1);
+static DIR_RIGHT: (i64, i64) = (1, 0);
+//static DIR_DOWN_RIGHT: (i64, i64) = (1, 1);
+static DIR_DOWN: (i64, i64) = (0, 1);
+//static DIR_DOWN_LEFT: (i64, i64) = (-1, 1);
+fn neighbour_empty(
+    config: &Spelunkicon,
+    grid: &PlacedTileGrid,
+    pos: (usize, usize),
+    dir: (i64, i64),
+    filled_type: Option<PlacedTile>,
+) -> bool {
+    let (x, y) = pos;
+    let (dx, dy) = dir;
+
+    if x as i64 + dx < 0 || x as i64 + dx >= config.grid_width as i64 {
+        return false;
+    }
+
+    if y as i64 + dy < 0 || y as i64 + dy >= config.grid_height as i64 {
+        return false;
+    }
+
+    let placed = grid[(y as i64 + dy) as usize][(x as i64 + dx) as usize];
+    if filled_type.is_some() {
+        let filled = filled_type.unwrap();
+        return placed != filled;
+    } else {
+        return placed == PlacedTile::None;
+    }
+}
 
 impl GenSheet {
     pub fn new(kind: GenKind, biome: Biome) -> Self {
@@ -173,38 +208,6 @@ impl GenSheet {
                 image.view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
             }
         }
-    }
-
-    fn left_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_col == 0 {
-            return false;
-        }
-
-        config.grid[curr_row][curr_col - 1]
-    }
-
-    fn right_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_col == config.height as usize - 1 {
-            return false;
-        }
-
-        config.grid[curr_row][curr_col + 1]
-    }
-
-    fn up_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_row == 0 {
-            return false;
-        }
-
-        config.grid[curr_row - 1][curr_col]
-    }
-
-    fn down_empty(&self, config: &Spelunkicon, curr_row: usize, curr_col: usize) -> bool {
-        if curr_row >= config.height as usize - 1 {
-            return false;
-        }
-
-        config.grid[curr_row + 1][curr_col]
     }
 
     fn place_floor_tiles(
@@ -293,32 +296,63 @@ impl GenSheet {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
+                    let pos = (col_idx, row_idx);
+
                     // Place generic deco
-                    if self.left_empty(config, row_idx, col_idx) {
+                    let left = neighbour_empty(
+                        config,
+                        existing_grid,
+                        pos,
+                        DIR_LEFT,
+                        Some(PlacedTile::Floor),
+                    );
+                    let right = neighbour_empty(
+                        config,
+                        existing_grid,
+                        pos,
+                        DIR_RIGHT,
+                        Some(PlacedTile::Floor),
+                    );
+                    let up = neighbour_empty(
+                        config,
+                        existing_grid,
+                        pos,
+                        DIR_UP,
+                        Some(PlacedTile::Floor),
+                    );
+                    let down = neighbour_empty(
+                        config,
+                        existing_grid,
+                        pos,
+                        DIR_DOWN,
+                        Some(PlacedTile::Floor),
+                    );
+
+                    if left {
                         let x = x - (TILE_WIDTH / 2) + 5;
-                        if self.up_empty(config, row_idx, col_idx) {
+                        if up {
                             overlay(base_image, &left_up_deco, x, y);
                         } else {
                             overlay(base_image, left_deco.choose(rng).unwrap(), x, y);
                         }
                     }
 
-                    if self.right_empty(config, row_idx, col_idx) {
+                    if right {
                         let x = x + (TILE_WIDTH / 2) - 5;
-                        if self.up_empty(config, row_idx, col_idx) {
+                        if up {
                             overlay(base_image, &right_up_deco, x, y);
                         } else {
                             overlay(base_image, right_deco.choose(rng).unwrap(), x, y);
                         }
                     }
 
-                    if self.down_empty(config, row_idx, col_idx) {
+                    if down {
                         let y = y + (TILE_HEIGHT / 2) - 12;
                         overlay(base_image, down_deco.choose(rng).unwrap(), x, y);
                     }
 
                     // Place generic top-deco or spikes top-deco
-                    if self.up_empty(config, row_idx, col_idx) {
+                    if up {
                         let y = y - (TILE_HEIGHT / 2) + 4;
                         if rng.gen::<u32>() % 12 == 0 {
                             overlay(base_image, spikes_deco.choose(rng).unwrap(), x, y);
