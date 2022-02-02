@@ -521,7 +521,7 @@ impl GenSheet {
         sheets: &Sheets,
         biome: &Biome,
         config: &Spelunkicon,
-        _rng: &mut StdRng,
+        rng: &mut StdRng,
         existing_grid: Option<PlacedTileGrid>,
     ) -> PlacedTileGrid {
         let sheet_image = sheets.sheet_floorstyled_from_biome(biome).unwrap();
@@ -532,6 +532,48 @@ impl GenSheet {
         });
 
         if has_existing_grid {
+            // Find a couple seeds for floorstyled, then do a small flood-fill
+            for _ in 0..2 {
+                let col_idx = rng.gen::<u32>() % config.grid_height as u32;
+                let row_idx = rng.gen::<u32>() % config.grid_width as u32;
+
+                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
+                    fn flood_fill(
+                        x: usize,
+                        y: usize,
+                        depth: usize,
+                        config: &Spelunkicon,
+                        grid: &mut PlacedTileGrid,
+                    ) {
+                        if grid[y][x] == PlacedTile::Floor {
+                            grid[y][x] = PlacedTile::FloorStyled;
+                            if depth == 0 {
+                                return;
+                            }
+
+                            if x > 0 {
+                                flood_fill(x - 1, y, depth - 1, &config, grid);
+                            }
+                            if y > 0 {
+                                flood_fill(x, y - 1, depth - 1, &config, grid);
+                            }
+                            if x < config.grid_width as usize - 1 {
+                                flood_fill(x + 1, y, depth - 1, &config, grid);
+                            }
+                            if y < config.grid_height as usize - 1 {
+                                flood_fill(x, y + 1, depth - 1, &config, grid);
+                            }
+                        }
+                    }
+                    flood_fill(
+                        col_idx as usize,
+                        row_idx as usize,
+                        3,
+                        &config,
+                        &mut placed_grid,
+                    );
+                }
+            }
         } else {
             for (row_idx, row) in config.grid.iter().enumerate() {
                 for (col_idx, col) in row.iter().enumerate() {
