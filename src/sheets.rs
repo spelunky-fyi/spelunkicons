@@ -463,7 +463,7 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[row_idx as usize][col_idx as usize] != PlacedTile::None {
+                if existing_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
