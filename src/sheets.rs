@@ -79,7 +79,7 @@ impl Sheets {
     fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
         match biome {
             Biome::Cave => Some(&self.floor_cave),
-            Biome::Jungle => Some(&self.floor_jungle),
+            Biome::Jungle | Biome::Beehive => Some(&self.floor_jungle),
             Biome::Babylon => Some(&self.floor_babylon),
             Biome::Eggplant => Some(&self.floor_eggplant),
             Biome::Ice => Some(&self.floor_ice),
@@ -109,6 +109,7 @@ impl Sheets {
             Biome::Mothership => Some(&self.floorstyled_mothership),
             Biome::PalaceOfPleasure => Some(&self.floorstyled_palace),
             Biome::Guts => Some(&self.floorstyled_guts),
+            Biome::Olmec => Some(&self.floorstyled_stone),
 
             _ => None,
         }
@@ -133,6 +134,7 @@ pub enum Biome {
     TidePool,
     Volcana,
     Vlad,
+    Olmec,
 }
 
 pub enum GenKind {

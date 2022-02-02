@@ -28,13 +28,14 @@ impl Generator {
 
             "FLOOR_CAVE"             => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Cave),
             "FLOOR_JUNGLE"           => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Jungle),
+            "FLOORSTYLED_BEEHIVE"    => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Beehive),
             "FLOOR_BABYLON"          => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Babylon),
             "FLOOR_SUNKEN"           => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Sunken),
             "FLOOR_TEMPLE"           => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::Temple),
             "FLOOR_TIDEPOOL"         => GenSheet::new(GenKind::FloorAndFloorStyled, Biome::TidePool),
 
-            "FLOORSTYLED_BEEHIVE"    => GenSheet::new(GenKind::FloorStyled, Biome::Beehive),
             "FLOORSTYLED_VLAD"       => GenSheet::new(GenKind::FloorStyled, Biome::Vlad),
+            "FLOORSTYLED_STONE"      => GenSheet::new(GenKind::FloorStyled, Biome::Olmec),
             "FLOORSTYLED_GOLD"       => GenSheet::new(GenKind::FloorStyled, Biome::CityOfGold),
             "FLOORSTYLED_DUAT"       => GenSheet::new(GenKind::FloorStyled, Biome::Duat),
             "FLOORSTYLED_MOTHERSHIP" => GenSheet::new(GenKind::FloorStyled, Biome::Mothership),
