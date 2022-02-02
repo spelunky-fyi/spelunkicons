@@ -156,13 +156,13 @@ enum PlacedTile {
 type PlacedTileGrid = Vec<Vec<PlacedTile>>;
 
 static DIR_LEFT: (i64, i64) = (-1, 0);
-//static DIR_UP_LEFT: (i64, i64) = (-1, -1);
+static DIR_UP_LEFT: (i64, i64) = (-1, -1);
 static DIR_UP: (i64, i64) = (0, -1);
-//static DIR_UP_RIGHT: (i64, i64) = (1, -1);
+static DIR_UP_RIGHT: (i64, i64) = (1, -1);
 static DIR_RIGHT: (i64, i64) = (1, 0);
-//static DIR_DOWN_RIGHT: (i64, i64) = (1, 1);
+static DIR_DOWN_RIGHT: (i64, i64) = (1, 1);
 static DIR_DOWN: (i64, i64) = (0, 1);
-//static DIR_DOWN_LEFT: (i64, i64) = (-1, 1);
+static DIR_DOWN_LEFT: (i64, i64) = (-1, 1);
 fn neighbour_empty(
     config: &Spelunkicon,
     grid: &PlacedTileGrid,
@@ -188,6 +188,177 @@ fn neighbour_empty(
     } else {
         return placed == PlacedTile::None;
     }
+}
+
+// Copy-Pasta from fensed code
+fn get_floor_styled_texture_coords(neighbour_mask: u8) -> (u32, u32) {
+    let nth_bit = |n| -> bool { ((neighbour_mask >> n) & 0b1u8) == 0b1u8 };
+
+    let left = nth_bit(0);
+    let down_left = nth_bit(1);
+    let down = nth_bit(2);
+    let down_right = nth_bit(3);
+    let right = nth_bit(4);
+    let up_right = nth_bit(5);
+    let up = nth_bit(6);
+    let up_left = nth_bit(7);
+
+    if !left && down && !down_right && right && !up {
+        return (4, 2);
+    }
+    if left && !down_left && down && !down_right && right && !up {
+        return (5, 2);
+    }
+    if left && !down_left && down && !right && !up {
+        return (6, 2);
+    }
+    if left && !down_left && down && !right && up && !up_left {
+        return (6, 3);
+    }
+    if left && !down && !right && up && !up_left {
+        return (6, 4);
+    }
+    if left && !down && right && !up_right && up && !up_left {
+        return (5, 4);
+    }
+    if !left && !down && right && !up_right && up {
+        return (4, 4);
+    }
+    if !left && down && !down_right && right && !up_right && up {
+        return (4, 3);
+    }
+
+    if !left && !down && !right && !up {
+        return (7, 2);
+    }
+
+    if !left && down && !right && !up {
+        return (3, 2);
+    }
+    if !left && down && !right && up {
+        return (3, 3);
+    }
+    if !left && !down && !right && up {
+        return (3, 4);
+    }
+
+    if !left && !down && right && !up {
+        return (0, 5);
+    }
+    if left && !down && right && !up {
+        return (1, 5);
+    }
+    if left && !down && !right && !up {
+        return (2, 5);
+    }
+
+    if !left && down && right && !up {
+        return (0, 2);
+    }
+    if left && down_left && down && down_right && right && !up {
+        return (1, 2);
+    }
+    if left && down && !right && !up {
+        return (2, 2);
+    }
+
+    if !left && !down && right && up {
+        return (0, 4);
+    }
+    if left && !down && right && up_right && up && up_left {
+        return (1, 4);
+    }
+    if left && !down && !right && up {
+        return (2, 4);
+    }
+
+    if !left && down && down_right && right && up_right && up {
+        return (0, 3);
+    }
+    if left && down_left && down && !right && up && up_left {
+        return (2, 3);
+    }
+
+    if neighbour_mask == 0b01111111 {
+        return (0, 0);
+    }
+    if neighbour_mask == 0b11011111 {
+        return (1, 0);
+    }
+    if neighbour_mask == 0b11110111 {
+        return (1, 1);
+    }
+    if neighbour_mask == 0b11111101 {
+        return (0, 1);
+    }
+
+    if left && !down_left && down && down_right && right && !up {
+        return (2, 0);
+    }
+    if left && down_left && down && !down_right && right && !up {
+        return (3, 0);
+    }
+    if left && !down && right && up_right && up && !up_left {
+        return (2, 1);
+    }
+    if left && !down && right && !up_right && up && up_left {
+        return (3, 1);
+    }
+
+    if !left && down && !down_right && right && up_right && up {
+        return (0, 6);
+    }
+    if left && !down_left && down && !right && up && up_left {
+        return (1, 6);
+    }
+    if !left && down && down_right && right && !up_right && up {
+        return (0, 7);
+    }
+    if left && down_left && down && !right && up && !up_left {
+        return (1, 7);
+    }
+
+    if neighbour_mask == 0b01011111 {
+        return (4, 0);
+    }
+    if neighbour_mask == 0b11110101 {
+        return (4, 1);
+    }
+    if neighbour_mask == 0b01111101 {
+        return (5, 0);
+    }
+    if neighbour_mask == 0b11010111 {
+        return (5, 1);
+    }
+
+    if neighbour_mask == 0b01110111 {
+        return (3, 5);
+    }
+    if neighbour_mask == 0b11011101 {
+        return (4, 5);
+    }
+
+    if neighbour_mask == 0b01011101 {
+        return (2, 6);
+    }
+    if neighbour_mask == 0b01010111 {
+        return (3, 6);
+    }
+    if neighbour_mask == 0b11010101 {
+        return (3, 7);
+    }
+    if neighbour_mask == 0b01110101 {
+        return (2, 7);
+    }
+
+    if neighbour_mask == 0b11111111 {
+        return (1, 3);
+    }
+    if neighbour_mask == 0b01010101 {
+        return (5, 3);
+    }
+
+    return (1, 3);
 }
 
 impl GenSheet {
@@ -297,37 +468,16 @@ impl GenSheet {
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
                     let pos = (col_idx, row_idx);
+                    let get_neighbour_empty = |dir| -> bool {
+                        neighbour_empty(config, &existing_grid, pos, dir, Some(PlacedTile::Floor))
+                    };
+
+                    let left = get_neighbour_empty(DIR_LEFT);
+                    let right = get_neighbour_empty(DIR_RIGHT);
+                    let up = get_neighbour_empty(DIR_UP);
+                    let down = get_neighbour_empty(DIR_DOWN);
 
                     // Place generic deco
-                    let left = neighbour_empty(
-                        config,
-                        existing_grid,
-                        pos,
-                        DIR_LEFT,
-                        Some(PlacedTile::Floor),
-                    );
-                    let right = neighbour_empty(
-                        config,
-                        existing_grid,
-                        pos,
-                        DIR_RIGHT,
-                        Some(PlacedTile::Floor),
-                    );
-                    let up = neighbour_empty(
-                        config,
-                        existing_grid,
-                        pos,
-                        DIR_UP,
-                        Some(PlacedTile::Floor),
-                    );
-                    let down = neighbour_empty(
-                        config,
-                        existing_grid,
-                        pos,
-                        DIR_DOWN,
-                        Some(PlacedTile::Floor),
-                    );
-
                     if left {
                         let x = x - (TILE_WIDTH / 2) + 5;
                         if up {
@@ -375,7 +525,6 @@ impl GenSheet {
         existing_grid: Option<PlacedTileGrid>,
     ) -> PlacedTileGrid {
         let sheet_image = sheets.sheet_floorstyled_from_biome(biome).unwrap();
-        let tile = self.base_tile(sheet_image);
 
         let has_existing_grid = existing_grid.is_some();
         let mut placed_grid = existing_grid.unwrap_or_else(|| {
@@ -389,12 +538,59 @@ impl GenSheet {
                     if *col {
                         continue;
                     }
+
+                    // Just mark that we have a tile here, draw the actual tile later
+                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
+                }
+            }
+        }
+
+        for (row_idx, row) in config.grid.iter().enumerate() {
+            for (col_idx, _) in row.iter().enumerate() {
+                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::FloorStyled {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
-                    // Place down base tile
+                    let pos = (col_idx, row_idx);
+                    let get_neighbour_empty = |dir| -> bool {
+                        neighbour_empty(
+                            config,
+                            &placed_grid,
+                            pos,
+                            dir,
+                            Some(PlacedTile::FloorStyled),
+                        )
+                    };
+
+                    let directions = [
+                        get_neighbour_empty(DIR_LEFT),
+                        get_neighbour_empty(DIR_DOWN_LEFT),
+                        get_neighbour_empty(DIR_DOWN),
+                        get_neighbour_empty(DIR_DOWN_RIGHT),
+                        get_neighbour_empty(DIR_RIGHT),
+                        get_neighbour_empty(DIR_UP_RIGHT),
+                        get_neighbour_empty(DIR_UP),
+                        get_neighbour_empty(DIR_UP_LEFT),
+                    ];
+
+                    let mut neighbour_mask: u8 = 0;
+                    for (dir_idx, dir) in directions.iter().enumerate() {
+                        if !*dir {
+                            let neighbour_bit = 0b1u8 << dir_idx;
+                            neighbour_mask |= neighbour_bit;
+                        }
+                    }
+
+                    let (ix, iy) = get_floor_styled_texture_coords(neighbour_mask);
+                    let tile = sheet_image.view(
+                        ix * TILE_WIDTH,
+                        iy * TILE_HEIGHT,
+                        TILE_WIDTH,
+                        TILE_HEIGHT,
+                    );
+
+                    // Place down tile tile
                     overlay(base_image, &tile, x, y);
-                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
                 }
             }
         }
@@ -424,7 +620,7 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[row_idx as usize][col_idx as usize] != PlacedTile::None {
+                if existing_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
