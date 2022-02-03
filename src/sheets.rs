@@ -389,7 +389,7 @@ impl GenSheet {
         config: &Spelunkicon,
         _rng: &mut StdRng,
     ) -> PlacedTileGrid {
-        let mut placed_grid =
+        let mut grid =
             vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize];
 
         for (row_idx, row) in config.grid.iter().enumerate() {
@@ -399,11 +399,11 @@ impl GenSheet {
                 }
 
                 // Mark that we placed a tile here
-                placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::Floor;
+                grid[row_idx as usize][col_idx as usize] = PlacedTile::Floor;
             }
         }
 
-        return placed_grid;
+        return grid;
     }
 
     fn place_floorstyled_tiles(
@@ -413,18 +413,18 @@ impl GenSheet {
         rng: &mut StdRng,
         existing_grid: Option<PlacedTileGrid>,
     ) -> PlacedTileGrid {
-        let has_existing_grid = existing_grid.is_some();
-        let mut placed_grid = existing_grid.unwrap_or_else(|| {
+        let has_grid = existing_grid.is_some();
+        let mut grid = existing_grid.unwrap_or_else(|| {
             vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize]
         });
 
-        if has_existing_grid {
+        if has_grid {
             // Find a couple seeds for floorstyled, then do a small flood-fill
             for _ in 0..2 {
                 let col_idx = rng.gen::<u32>() % config.grid_height as u32;
                 let row_idx = rng.gen::<u32>() % config.grid_width as u32;
 
-                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
+                if grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
                     fn flood_fill(
                         x: usize,
                         y: usize,
@@ -452,13 +452,7 @@ impl GenSheet {
                             }
                         }
                     }
-                    flood_fill(
-                        col_idx as usize,
-                        row_idx as usize,
-                        3,
-                        &config,
-                        &mut placed_grid,
-                    );
+                    flood_fill(col_idx as usize, row_idx as usize, 3, &config, &mut grid);
                 }
             }
         } else {
@@ -469,12 +463,12 @@ impl GenSheet {
                     }
 
                     // Just mark that we have a tile here, draw the actual tile later
-                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
+                    grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
                 }
             }
         }
 
-        return placed_grid;
+        return grid;
     }
 
     fn render_floor_tiles(
@@ -566,7 +560,7 @@ impl GenSheet {
         biome: &Biome,
         config: &Spelunkicon,
         rng: &mut StdRng,
-        existing_grid: &PlacedTileGrid,
+        grid: &PlacedTileGrid,
     ) {
         let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
 
@@ -607,13 +601,13 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
+                if grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
                     let pos = (col_idx, row_idx);
                     let get_neighbour_empty = |dir| -> bool {
-                        neighbour_empty(config, &existing_grid, pos, dir, Some(PlacedTile::Floor))
+                        neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::Floor))
                     };
 
                     let left = get_neighbour_empty(DIR_LEFT);
@@ -665,7 +659,7 @@ impl GenSheet {
         sheets: &Sheets,
         config: &Spelunkicon,
         rng: &mut StdRng,
-        existing_grid: &PlacedTileGrid,
+        grid: &PlacedTileGrid,
     ) {
         let crust_gold = vec![
             sheets
@@ -697,7 +691,7 @@ impl GenSheet {
                     continue;
                 }
 
-                if existing_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
+                if grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
                     let x = col_idx as u32 * TILE_HEIGHT as u32;
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
