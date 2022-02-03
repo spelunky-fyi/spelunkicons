@@ -967,7 +967,15 @@ impl GenSheet {
                         place_tile(biome_sheet, 11, 10);
                     }
                     PlacedTile::PushBlock => {
-                        place_tile(biome_sheet, 7, 0);
+                        let sheet = match biome {
+                            Biome::CityOfGold | Biome::Duat => floorstyled_biome_sheet,
+                            _ => biome_sheet,
+                        };
+                        let (ix, iy) = match biome {
+                            Biome::CityOfGold | Biome::Duat => (9, 0),
+                            _ => (7, 0),
+                        };
+                        place_tile(sheet, ix, iy);
                     }
                     PlacedTile::PowderKeg => {
                         place_tile(floormisc, 2, 2);
