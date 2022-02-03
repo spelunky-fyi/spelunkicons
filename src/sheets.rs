@@ -409,14 +409,17 @@ impl GenSheet {
         }
     }
 
-    pub fn base_tile<'a>(&self, image: &'a DynamicImage) -> SubImage<&'a DynamicImage> {
+    pub fn base_tiles<'a>(&self, image: &'a DynamicImage) -> Vec<SubImage<&'a DynamicImage>> {
         match self {
             GenSheet::Floor(_) | GenSheet::FloorAndFloorStyled(_) => {
-                image.view(0, 0, TILE_WIDTH, TILE_HEIGHT)
+                vec![
+                    image.view(0, 0, TILE_WIDTH, TILE_HEIGHT),
+                    image.view(TILE_WIDTH, 0, TILE_WIDTH, TILE_HEIGHT),
+                    image.view(0, TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                    image.view(TILE_WIDTH, TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                ]
             }
-            GenSheet::FloorStyled(_) => {
-                image.view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
-            }
+            _ => vec![],
         }
     }
 
@@ -798,12 +801,12 @@ impl GenSheet {
         sheets: &Sheets,
         biome: &Biome,
         _config: &Spelunkicon,
-        _rng: &mut StdRng,
+        rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
         let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
 
-        let tile_image = self.base_tile(sheet_image);
+        let tile_images = self.base_tiles(sheet_image);
 
         for (row_idx, row) in grid.iter().enumerate() {
             for (col_idx, tile) in row.iter().enumerate() {
@@ -812,7 +815,7 @@ impl GenSheet {
                     let y = row_idx as u32 * TILE_WIDTH as u32;
 
                     // Place down base tile
-                    overlay(base_image, &tile_image, x, y);
+                    overlay(base_image, tile_images.choose(rng).unwrap(), x, y);
                 }
             }
         }
