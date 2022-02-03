@@ -227,7 +227,7 @@ fn neighbour_empty(
     }
 }
 
-// Copy-Pasta from fensed code
+// Copy-Pasta from fenesd code
 fn get_floor_styled_texture_coords(neighbour_mask: u8) -> (u32, u32) {
     let nth_bit = |n| -> bool { ((neighbour_mask >> n) & 0b1u8) == 0b1u8 };
 
