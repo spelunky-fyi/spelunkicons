@@ -385,16 +385,10 @@ impl GenSheet {
 
     fn place_floor_tiles(
         &self,
-        base_image: &mut RgbaImage,
-        sheets: &Sheets,
-        biome: &Biome,
+        _biome: &Biome,
         config: &Spelunkicon,
         _rng: &mut StdRng,
     ) -> PlacedTileGrid {
-        let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
-
-        let tile = self.base_tile(sheet_image);
-
         let mut placed_grid =
             vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize];
 
@@ -403,11 +397,6 @@ impl GenSheet {
                 if *col {
                     continue;
                 }
-                let x = col_idx as u32 * TILE_HEIGHT as u32;
-                let y = row_idx as u32 * TILE_WIDTH as u32;
-
-                // Place down base tile
-                overlay(base_image, &tile, x, y);
 
                 // Mark that we placed a tile here
                 placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::Floor;
@@ -417,7 +406,160 @@ impl GenSheet {
         return placed_grid;
     }
 
-    fn place_floor_decorations(
+    fn place_floorstyled_tiles(
+        &self,
+        _biome: &Biome,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+        existing_grid: Option<PlacedTileGrid>,
+    ) -> PlacedTileGrid {
+        let has_existing_grid = existing_grid.is_some();
+        let mut placed_grid = existing_grid.unwrap_or_else(|| {
+            vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize]
+        });
+
+        if has_existing_grid {
+            // Find a couple seeds for floorstyled, then do a small flood-fill
+            for _ in 0..2 {
+                let col_idx = rng.gen::<u32>() % config.grid_height as u32;
+                let row_idx = rng.gen::<u32>() % config.grid_width as u32;
+
+                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
+                    fn flood_fill(
+                        x: usize,
+                        y: usize,
+                        depth: usize,
+                        config: &Spelunkicon,
+                        grid: &mut PlacedTileGrid,
+                    ) {
+                        if grid[y][x] == PlacedTile::Floor {
+                            grid[y][x] = PlacedTile::FloorStyled;
+                            if depth == 0 {
+                                return;
+                            }
+
+                            if x > 0 {
+                                flood_fill(x - 1, y, depth - 1, &config, grid);
+                            }
+                            if y > 0 {
+                                flood_fill(x, y - 1, depth - 1, &config, grid);
+                            }
+                            if x < config.grid_width as usize - 1 {
+                                flood_fill(x + 1, y, depth - 1, &config, grid);
+                            }
+                            if y < config.grid_height as usize - 1 {
+                                flood_fill(x, y + 1, depth - 1, &config, grid);
+                            }
+                        }
+                    }
+                    flood_fill(
+                        col_idx as usize,
+                        row_idx as usize,
+                        3,
+                        &config,
+                        &mut placed_grid,
+                    );
+                }
+            }
+        } else {
+            for (row_idx, row) in config.grid.iter().enumerate() {
+                for (col_idx, col) in row.iter().enumerate() {
+                    if *col {
+                        continue;
+                    }
+
+                    // Just mark that we have a tile here, draw the actual tile later
+                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
+                }
+            }
+        }
+
+        return placed_grid;
+    }
+
+    fn render_floor_tiles(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        biome: &Biome,
+        _config: &Spelunkicon,
+        _rng: &mut StdRng,
+        grid: &PlacedTileGrid,
+    ) {
+        let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
+
+        let tile_image = self.base_tile(sheet_image);
+
+        for (row_idx, row) in grid.iter().enumerate() {
+            for (col_idx, tile) in row.iter().enumerate() {
+                if *tile == PlacedTile::Floor {
+                    let x = col_idx as u32 * TILE_HEIGHT as u32;
+                    let y = row_idx as u32 * TILE_WIDTH as u32;
+
+                    // Place down base tile
+                    overlay(base_image, &tile_image, x, y);
+                }
+            }
+        }
+    }
+
+    fn render_floorstyled_tiles(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        biome: &Biome,
+        config: &Spelunkicon,
+        _rng: &mut StdRng,
+        grid: &PlacedTileGrid,
+    ) {
+        let sheet_image = sheets.sheet_floorstyled_from_biome(biome).unwrap();
+
+        for (row_idx, row) in grid.iter().enumerate() {
+            for (col_idx, tile) in row.iter().enumerate() {
+                if *tile == PlacedTile::FloorStyled {
+                    let x = col_idx as u32 * TILE_HEIGHT as u32;
+                    let y = row_idx as u32 * TILE_WIDTH as u32;
+
+                    let pos = (col_idx, row_idx);
+                    let get_neighbour_empty = |dir| -> bool {
+                        neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::FloorStyled))
+                    };
+
+                    let directions = [
+                        get_neighbour_empty(DIR_LEFT),
+                        get_neighbour_empty(DIR_DOWN_LEFT),
+                        get_neighbour_empty(DIR_DOWN),
+                        get_neighbour_empty(DIR_DOWN_RIGHT),
+                        get_neighbour_empty(DIR_RIGHT),
+                        get_neighbour_empty(DIR_UP_RIGHT),
+                        get_neighbour_empty(DIR_UP),
+                        get_neighbour_empty(DIR_UP_LEFT),
+                    ];
+
+                    let mut neighbour_mask: u8 = 0;
+                    for (dir_idx, dir) in directions.iter().enumerate() {
+                        if !*dir {
+                            let neighbour_bit = 0b1u8 << dir_idx;
+                            neighbour_mask |= neighbour_bit;
+                        }
+                    }
+
+                    let (ix, iy) = get_floor_styled_texture_coords(neighbour_mask);
+                    let tile = sheet_image.view(
+                        ix * TILE_WIDTH,
+                        iy * TILE_HEIGHT,
+                        TILE_WIDTH,
+                        TILE_HEIGHT,
+                    );
+
+                    // Place down tile tile
+                    overlay(base_image, &tile, x, y);
+                }
+            }
+        }
+    }
+
+    fn render_floor_decorations(
         &self,
         base_image: &mut RgbaImage,
         sheets: &Sheets,
@@ -517,131 +659,7 @@ impl GenSheet {
         }
     }
 
-    fn place_floorstyled_tiles(
-        &self,
-        base_image: &mut RgbaImage,
-        sheets: &Sheets,
-        biome: &Biome,
-        config: &Spelunkicon,
-        rng: &mut StdRng,
-        existing_grid: Option<PlacedTileGrid>,
-    ) -> PlacedTileGrid {
-        let sheet_image = sheets.sheet_floorstyled_from_biome(biome).unwrap();
-
-        let has_existing_grid = existing_grid.is_some();
-        let mut placed_grid = existing_grid.unwrap_or_else(|| {
-            vec![vec![PlacedTile::None; config.grid_width as usize]; config.grid_height as usize]
-        });
-
-        if has_existing_grid {
-            // Find a couple seeds for floorstyled, then do a small flood-fill
-            for _ in 0..2 {
-                let col_idx = rng.gen::<u32>() % config.grid_height as u32;
-                let row_idx = rng.gen::<u32>() % config.grid_width as u32;
-
-                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
-                    fn flood_fill(
-                        x: usize,
-                        y: usize,
-                        depth: usize,
-                        config: &Spelunkicon,
-                        grid: &mut PlacedTileGrid,
-                    ) {
-                        if grid[y][x] == PlacedTile::Floor {
-                            grid[y][x] = PlacedTile::FloorStyled;
-                            if depth == 0 {
-                                return;
-                            }
-
-                            if x > 0 {
-                                flood_fill(x - 1, y, depth - 1, &config, grid);
-                            }
-                            if y > 0 {
-                                flood_fill(x, y - 1, depth - 1, &config, grid);
-                            }
-                            if x < config.grid_width as usize - 1 {
-                                flood_fill(x + 1, y, depth - 1, &config, grid);
-                            }
-                            if y < config.grid_height as usize - 1 {
-                                flood_fill(x, y + 1, depth - 1, &config, grid);
-                            }
-                        }
-                    }
-                    flood_fill(
-                        col_idx as usize,
-                        row_idx as usize,
-                        3,
-                        &config,
-                        &mut placed_grid,
-                    );
-                }
-            }
-        } else {
-            for (row_idx, row) in config.grid.iter().enumerate() {
-                for (col_idx, col) in row.iter().enumerate() {
-                    if *col {
-                        continue;
-                    }
-
-                    // Just mark that we have a tile here, draw the actual tile later
-                    placed_grid[row_idx as usize][col_idx as usize] = PlacedTile::FloorStyled;
-                }
-            }
-        }
-
-        for (row_idx, row) in config.grid.iter().enumerate() {
-            for (col_idx, _) in row.iter().enumerate() {
-                if placed_grid[row_idx as usize][col_idx as usize] == PlacedTile::FloorStyled {
-                    let x = col_idx as u32 * TILE_HEIGHT as u32;
-                    let y = row_idx as u32 * TILE_WIDTH as u32;
-
-                    let pos = (col_idx, row_idx);
-                    let get_neighbour_empty = |dir| -> bool {
-                        neighbour_empty(
-                            config,
-                            &placed_grid,
-                            pos,
-                            dir,
-                            Some(PlacedTile::FloorStyled),
-                        )
-                    };
-
-                    let directions = [
-                        get_neighbour_empty(DIR_LEFT),
-                        get_neighbour_empty(DIR_DOWN_LEFT),
-                        get_neighbour_empty(DIR_DOWN),
-                        get_neighbour_empty(DIR_DOWN_RIGHT),
-                        get_neighbour_empty(DIR_RIGHT),
-                        get_neighbour_empty(DIR_UP_RIGHT),
-                        get_neighbour_empty(DIR_UP),
-                        get_neighbour_empty(DIR_UP_LEFT),
-                    ];
-
-                    let mut neighbour_mask: u8 = 0;
-                    for (dir_idx, dir) in directions.iter().enumerate() {
-                        if !*dir {
-                            let neighbour_bit = 0b1u8 << dir_idx;
-                            neighbour_mask |= neighbour_bit;
-                        }
-                    }
-
-                    let (ix, iy) = get_floor_styled_texture_coords(neighbour_mask);
-                    let tile = sheet_image.view(
-                        ix * TILE_WIDTH,
-                        iy * TILE_HEIGHT,
-                        TILE_WIDTH,
-                        TILE_HEIGHT,
-                    );
-
-                    // Place down tile tile
-                    overlay(base_image, &tile, x, y);
-                }
-            }
-        }
-        return placed_grid;
-    }
-
-    fn place_floor_embeds(
+    fn render_floor_embeds(
         &self,
         base_image: &mut RgbaImage,
         sheets: &Sheets,
@@ -705,25 +723,23 @@ impl GenSheet {
     ) {
         match self {
             GenSheet::Floor(biome) => {
-                let floor = self.place_floor_tiles(base_image, sheets, biome, config, rng);
-                self.place_floor_decorations(base_image, sheets, biome, config, rng, &floor);
-                self.place_floor_embeds(base_image, sheets, config, rng, &floor);
+                let floor = self.place_floor_tiles(biome, config, rng);
+                self.render_floor_tiles(base_image, sheets, biome, config, rng, &floor);
+                self.render_floor_decorations(base_image, sheets, biome, config, rng, &floor);
+                self.render_floor_embeds(base_image, sheets, config, rng, &floor);
             }
             GenSheet::FloorStyled(biome) => {
-                self.place_floorstyled_tiles(base_image, sheets, biome, config, rng, None);
+                let floor = self.place_floorstyled_tiles(biome, config, rng, None);
+                self.render_floorstyled_tiles(base_image, sheets, biome, config, rng, &floor);
             }
             GenSheet::FloorAndFloorStyled(biome) => {
-                let floor = self.place_floor_tiles(base_image, sheets, biome, config, rng);
-                let floor = self.place_floorstyled_tiles(
-                    base_image,
-                    sheets,
-                    biome,
-                    config,
-                    rng,
-                    Some(floor),
-                );
-                self.place_floor_decorations(base_image, sheets, biome, config, rng, &floor);
-                self.place_floor_embeds(base_image, sheets, config, rng, &floor);
+                let floor = self.place_floor_tiles(biome, config, rng);
+                let floor = self.place_floorstyled_tiles(biome, config, rng, Some(floor));
+
+                self.render_floor_tiles(base_image, sheets, biome, config, rng, &floor);
+                self.render_floorstyled_tiles(base_image, sheets, biome, config, rng, &floor);
+                self.render_floor_decorations(base_image, sheets, biome, config, rng, &floor);
+                self.render_floor_embeds(base_image, sheets, config, rng, &floor);
             }
         }
     }
