@@ -186,7 +186,8 @@ enum PlacedTile {
     ChainMid,
     ChainBot,
     Platform,
-    UdjatSocket,
+    UdjatSocketTop,
+    UdjatSocketBot,
     ConveyorLeft,
     ConveyorRight,
     PushBlock,
@@ -627,7 +628,10 @@ impl GenSheet {
                     if this {
                         let down = directions[&DIR_DOWN];
                         let up = directions[&DIR_UP];
-                        if down && !up {
+                        if !down && rng.gen_bool(0.01) {
+                            grid[row_idx - 1][col_idx] = PlacedTile::UdjatSocketTop;
+                            grid[row_idx][col_idx] = PlacedTile::UdjatSocketBot;
+                        } else if down && !up {
                             grid[row_idx - 1][col_idx] = PlacedTile::ChainTop;
                             for i in 0..4 {
                                 if row_idx + i as usize == config.grid_height as usize - 1
@@ -906,7 +910,7 @@ impl GenSheet {
         sheets: &Sheets,
         biome: &Biome,
         config: &Spelunkicon,
-        _rng: &mut StdRng,
+        rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
         let floormisc = &sheets.floormisc;
@@ -1098,7 +1102,16 @@ impl GenSheet {
                         }
                         _ => {}
                     },
-                    PlacedTile::UdjatSocket => {}
+                    PlacedTile::UdjatSocketTop => {
+                        if rng.gen_bool(0.5) {
+                            place_tile(floormisc, 5, 5);
+                        } else {
+                            place_tile(floormisc, 4, 5);
+                        }
+                    }
+                    PlacedTile::UdjatSocketBot => {
+                        place_tile(&sheets.floorstyled_babylon, 7, 2);
+                    }
                     PlacedTile::ConveyorLeft => {
                         place_tile(biome_sheet, 11, 11);
                     }
