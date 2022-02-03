@@ -175,7 +175,10 @@ enum PlacedTile {
     FrogTrapLeft,
     FrogTrapRight,
     CrushTrap,
-    LargeCrushTrap,
+    LargeCrushTrapTopLeft,
+    LargeCrushTrapTopRight,
+    LargeCrushTrapBotLeft,
+    LargeCrushTrapBotRight,
     BushBlock,
     BoneBlock,
     IceBlock,
@@ -700,6 +703,26 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::Temple | Biome::CityOfGold => {
+                    let this = directions[&DIR_NONE];
+                    if !this {
+                        let right = directions[&DIR_RIGHT];
+                        let down = directions[&DIR_DOWN];
+                        let down_right = directions[&DIR_DOWN_RIGHT];
+                        if !right && !down && !down_right && rng.gen_bool(0.5) {
+                            grid[row_idx][col_idx] = PlacedTile::LargeCrushTrapTopLeft;
+                            grid[row_idx][col_idx + 1] = PlacedTile::LargeCrushTrapTopRight;
+                            grid[row_idx + 1][col_idx] = PlacedTile::LargeCrushTrapBotLeft;
+                            grid[row_idx + 1][col_idx + 1] = PlacedTile::LargeCrushTrapBotRight;
+                        } else {
+                            let left = directions[&DIR_LEFT];
+                            let up = directions[&DIR_UP];
+                            if left || right || up || down {
+                                grid[row_idx][col_idx] = PlacedTile::CrushTrap;
+                            }
+                        }
+                    }
+                }
                 Biome::Ice => {
                     let this = directions[&DIR_NONE];
                     if !this {
@@ -981,22 +1004,26 @@ impl GenSheet {
                     }
                     PlacedTile::FrogTrapLeft => {}
                     PlacedTile::FrogTrapRight => {}
-                    PlacedTile::CrushTrap => {
-                        place_tile(floormisc, 0, 6);
-                    }
-                    PlacedTile::LargeCrushTrap => {
-                        let down = grid[row_idx - 1][col_idx] == *tile;
-                        let left = grid[row_idx][col_idx - 1] == *tile;
-                        if down && left {
-                            place_tile(floormisc, 1, 4);
-                        } else if down && !left {
-                            place_tile(floormisc, 0, 4);
-                        } else if !down && left {
-                            place_tile(floormisc, 1, 5);
-                        } else {
-                            place_tile(floormisc, 0, 5);
-                        }
-                    }
+                    PlacedTile::CrushTrap => match biome {
+                        Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 9, 0),
+                        _ => place_tile(floorstyled_biome_sheet, 0, 6),
+                    },
+                    PlacedTile::LargeCrushTrapTopLeft => match biome {
+                        Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 6, 0),
+                        _ => place_tile(floormisc, 0, 4),
+                    },
+                    PlacedTile::LargeCrushTrapTopRight => match biome {
+                        Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 7, 0),
+                        _ => place_tile(floormisc, 1, 4),
+                    },
+                    PlacedTile::LargeCrushTrapBotLeft => match biome {
+                        Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 6, 1),
+                        _ => place_tile(floormisc, 0, 5),
+                    },
+                    PlacedTile::LargeCrushTrapBotRight => match biome {
+                        Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 7, 1),
+                        _ => place_tile(floormisc, 1, 5),
+                    },
                     PlacedTile::BushBlock => {
                         place_tile(biome_sheet, 10, 2);
                     }
