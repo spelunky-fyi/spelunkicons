@@ -969,6 +969,7 @@ impl GenSheet {
                     PlacedTile::PushBlock => {
                         let sheet = match biome {
                             Biome::CityOfGold | Biome::Duat => floorstyled_biome_sheet,
+                            Biome::Surface => &sheets.floor_cave,
                             _ => biome_sheet,
                         };
                         let (ix, iy) = match biome {
