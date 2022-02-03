@@ -168,6 +168,7 @@ enum PlacedTile {
     EggplantAltarLeft,
     EggplantAltarRight,
     ArrowTrap,
+    LaserTrap,
     TotemTrap,
     LionTrap,
     SpearTrap,
@@ -179,7 +180,6 @@ enum PlacedTile {
     BoneBlock,
     IceBlock,
     ChainTop,
-    Laser,
     Platform,
     UdjatSocket,
     ConveyorLeft,
@@ -839,7 +839,7 @@ impl GenSheet {
                     PlacedTile::EggplantAltarRight => {
                         place_tile(biome_sheet, 11, 2);
                     }
-                    PlacedTile::ArrowTrap | PlacedTile::Laser => {
+                    PlacedTile::ArrowTrap | PlacedTile::LaserTrap => {
                         let (ix, iy) = match biome {
                             Biome::Sunken => (6, 0),
                             Biome::Babylon => (5, 4),
