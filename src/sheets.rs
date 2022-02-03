@@ -919,22 +919,37 @@ impl GenSheet {
                                 _ => &floormisc,
                             };
 
-                            for i in 0..3 {
-                                let iy = iy + i;
-                                let y = y + i * TILE_HEIGHT;
-                                let tile_image = sheet.view(
-                                    ix * TILE_WIDTH,
-                                    iy * TILE_HEIGHT,
-                                    TILE_WIDTH,
-                                    TILE_HEIGHT,
-                                );
-                                overlay(base_image, &tile_image, x, y);
+                            if grid[row_idx + 1][col_idx] != PlacedTile::None {
+                                place_tile(sheet, ix - 1, iy);
+                            } else {
+                                place_tile(sheet, ix, iy);
 
-                                let row_idx = row_idx as u32 + i + 1;
-                                if row_idx == config.grid_height as u32
-                                    || grid[row_idx as usize][col_idx] != PlacedTile::None
-                                {
-                                    break;
+                                let iy = iy + 1;
+                                for i in 1..config.grid_height as u32 {
+                                    let y = y + i * TILE_HEIGHT;
+                                    let next_row_idx = row_idx + i as usize + 1;
+                                    if next_row_idx == config.grid_height as usize
+                                        || grid[next_row_idx as usize][col_idx] != PlacedTile::None
+                                    {
+                                        let iy = iy + 1;
+                                        let tile_image = sheet.view(
+                                            ix * TILE_WIDTH,
+                                            iy * TILE_HEIGHT,
+                                            TILE_WIDTH,
+                                            TILE_HEIGHT,
+                                        );
+                                        overlay(base_image, &tile_image, x, y);
+
+                                        break;
+                                    } else {
+                                        let tile_image = sheet.view(
+                                            ix * TILE_WIDTH,
+                                            iy * TILE_HEIGHT,
+                                            TILE_WIDTH,
+                                            TILE_HEIGHT,
+                                        );
+                                        overlay(base_image, &tile_image, x, y);
+                                    }
                                 }
                             }
                         }
