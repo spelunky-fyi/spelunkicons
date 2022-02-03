@@ -614,6 +614,16 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::Babylon => {
+                    let this = directions[&DIR_NONE];
+                    if !this {
+                        let left = directions[&DIR_LEFT];
+                        let right = directions[&DIR_RIGHT];
+                        if left != right {
+                            grid[row_idx][col_idx] = PlacedTile::LaserTrap;
+                        }
+                    }
+                }
                 _ => {}
             }
 
