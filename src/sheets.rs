@@ -661,6 +661,7 @@ impl GenSheet {
                         Biome::Cave
                         | Biome::TidePool
                         | Biome::Surface
+                        | Biome::PalaceOfPleasure
                         | Biome::Ice
                         | Biome::Volcana => {
                             grid[row_idx][col_idx] = PlacedTile::Platform;
@@ -769,6 +770,9 @@ impl GenSheet {
         let biome_sheet = sheets
             .sheet_floor_from_biome(biome)
             .unwrap_or(&sheets.floor_cave);
+        let floorstyled_biome_sheet = sheets
+            .sheet_floorstyled_from_biome(biome)
+            .unwrap_or(&sheets.floorstyled_stone);
 
         for (row_idx, row) in grid.iter().enumerate() {
             for (col_idx, tile) in row.iter().enumerate() {
@@ -884,16 +888,24 @@ impl GenSheet {
                     }
                     PlacedTile::ChainTop => {}
                     PlacedTile::Platform => match biome {
-                        Biome::Cave | Biome::TidePool | Biome::Surface => {
+                        Biome::Cave
+                        | Biome::TidePool
+                        | Biome::Surface
+                        | Biome::PalaceOfPleasure => {
                             let (ix, iy) = match biome {
                                 Biome::TidePool => (7, 3),
+                                Biome::PalaceOfPleasure => (9, 2),
                                 _ => (1, 1),
+                            };
+                            let sheet = match biome {
+                                Biome::PalaceOfPleasure => &floorstyled_biome_sheet,
+                                _ => &floormisc,
                             };
 
                             for i in 0..3 {
                                 let iy = iy + i;
                                 let y = y + i * TILE_HEIGHT;
-                                let tile_image = floormisc.view(
+                                let tile_image = sheet.view(
                                     ix * TILE_WIDTH,
                                     iy * TILE_HEIGHT,
                                     TILE_WIDTH,
