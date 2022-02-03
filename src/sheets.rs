@@ -614,6 +614,32 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::TidePool => {
+                    let this = directions[&DIR_NONE];
+                    if this {
+                        let up = directions[&DIR_UP];
+                        let down = directions[&DIR_DOWN];
+                        if up && !down {
+                            let left = directions[&DIR_LEFT];
+                            let up_left = directions[&DIR_UP_LEFT];
+                            let right = directions[&DIR_RIGHT];
+                            let up_right = directions[&DIR_UP_RIGHT];
+
+                            if left && up_left && right && up_right {
+                                grid[row_idx][col_idx] = PlacedTile::LionTrap;
+                                if row_idx > 0 {
+                                    grid[row_idx - 1][col_idx] = PlacedTile::LionTrap;
+                                }
+                            };
+                        }
+                    }
+                }
+                Biome::Ice => {
+                    let this = directions[&DIR_NONE];
+                    if !this {
+                        grid[row_idx][col_idx] = PlacedTile::IceBlock;
+                    }
+                }
                 Biome::Babylon => {
                     let this = directions[&DIR_NONE];
                     if !this {
