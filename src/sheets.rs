@@ -635,9 +635,21 @@ impl GenSheet {
                         && ((left && !down_left && up_left) || (right && !down_right && up_right))
                     {
                         let (left_type, right_type) = match biome {
-                            Biome::Cave | Biome::Volcana | Biome::Ice | Biome::TidePool => {
+                            Biome::Cave | Biome::Volcana | Biome::TidePool => {
                                 if rng.gen_bool(0.5) {
                                     (PlacedTile::AltarLeft, PlacedTile::AltarRight)
+                                } else {
+                                    (PlacedTile::IdolAltarLeft, PlacedTile::IdolAltarRight)
+                                }
+                            }
+                            Biome::Ice => {
+                                if rng.gen_bool(0.3333) {
+                                    (PlacedTile::AltarLeft, PlacedTile::AltarRight)
+                                } else if rng.gen_bool(0.5) {
+                                    (
+                                        PlacedTile::EggplantAltarLeft,
+                                        PlacedTile::EggplantAltarRight,
+                                    )
                                 } else {
                                     (PlacedTile::IdolAltarLeft, PlacedTile::IdolAltarRight)
                                 }
