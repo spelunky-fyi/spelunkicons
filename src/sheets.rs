@@ -631,6 +631,7 @@ impl GenSheet {
 
                 if !down {
                     if !placed_altar
+                        && rng.gen_bool(0.2)
                         && (this && up)
                         && ((left && !down_left && up_left) || (right && !down_right && up_right))
                     {
