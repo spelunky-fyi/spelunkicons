@@ -161,14 +161,18 @@ enum PlacedTile {
     FloorStyled,
 
     // FloorMisc
-    Altar,
-    IdolAltar,
-    EggplantAltar,
+    AltarLeft,
+    AltarRight,
+    IdolAltarLeft,
+    IdolAltarRight,
+    EggplantAltarLeft,
+    EggplantAltarRight,
     ArrowTrap,
     TotemTrap,
     LionTrap,
     SpearTrap,
-    FrogTrap,
+    FrogTrapLeft,
+    FrogTrapRight,
     CrushTrap,
     LargeCrushTrap,
     BushBlock,
@@ -178,7 +182,8 @@ enum PlacedTile {
     Laser,
     Platform,
     UdjatSocket,
-    Conveyor,
+    ConveyorLeft,
+    ConveyorRight,
     PushBlock,
     PowderKeg,
 }
@@ -508,10 +513,13 @@ impl GenSheet {
     ) -> PlacedTileGrid {
         let mut grid = grid;
 
+        // Don't wanna place multiple altars
+        let mut placed_altar = false;
+
         // Try to place a few floormisc stuff
         // We are trying more than we want because most of those will be invalid anyways
         for _ in 0..8 {
-            // Don't place these things right on the border
+            // Don't place these things right on the border, makes some stuff easier
             let col_idx = rng.gen::<usize>() % (config.grid_height as usize - 2) + 1;
             let row_idx = rng.gen::<usize>() % (config.grid_width as usize - 2) + 1;
 
@@ -557,9 +565,8 @@ impl GenSheet {
                             }
                         }
                     } else {
-                        let left = directions[&DIR_LEFT] || col_idx == 0;
-                        let right =
-                            directions[&DIR_RIGHT] || col_idx == config.grid_width as usize - 1;
+                        let left = directions[&DIR_LEFT];
+                        let right = directions[&DIR_RIGHT];
                         if left != right {
                             grid[row_idx][col_idx] = PlacedTile::ArrowTrap;
                         }
@@ -576,26 +583,48 @@ impl GenSheet {
                 let down = directions[&DIR_DOWN];
                 let down_left = directions[&DIR_DOWN_LEFT];
                 let down_right = directions[&DIR_DOWN_RIGHT];
+                let up = directions[&DIR_UP];
+                let up_left = directions[&DIR_UP_LEFT];
+                let up_right = directions[&DIR_UP_RIGHT];
 
                 if !down {
-                    if this && ((left && !down_left) || (right && !down_right)) {
-                        let altar_type = if rng.gen_bool(0.5) {
-                            PlacedTile::IdolAltar
+                    if !placed_altar
+                        && (this && up)
+                        && ((left && !down_left && up_left) || (right && !down_right && up_right))
+                    {
+                        let (left_type, right_type) = if rng.gen_bool(0.5) {
+                            (PlacedTile::AltarLeft, PlacedTile::AltarRight)
                         } else {
-                            PlacedTile::Altar
+                            (PlacedTile::IdolAltarLeft, PlacedTile::IdolAltarRight)
                         };
 
-                        grid[row_idx][col_idx] = altar_type;
-                        if left && col_idx > 0 {
-                            grid[row_idx][col_idx - 1] = altar_type;
-                        } else if right && col_idx < config.grid_width as usize - 1 {
-                            grid[row_idx][col_idx + 1] = altar_type;
+                        if left && !down_left && up_left {
+                            grid[row_idx][col_idx - 1] = left_type;
+                            grid[row_idx][col_idx] = right_type;
+                        } else {
+                            grid[row_idx][col_idx] = left_type;
+                            grid[row_idx][col_idx + 1] = right_type;
                         }
-                    } else if this && left && right {
-                        grid[row_idx][col_idx] = PlacedTile::PowderKeg;
+
+                        placed_altar = true;
+                    } else if this && (left || right) {
+                        grid[row_idx][col_idx] = if rng.gen_bool(0.05) {
+                            PlacedTile::PowderKeg
+                        } else {
+                            PlacedTile::PushBlock
+                        }
                     }
-                } else {
-                    grid[row_idx][col_idx] = PlacedTile::Platform;
+                } else if up {
+                    match biome {
+                        Biome::Cave
+                        | Biome::TidePool
+                        | Biome::Surface
+                        | Biome::Ice
+                        | Biome::Volcana => {
+                            grid[row_idx][col_idx] = PlacedTile::Platform;
+                        }
+                        _ => {}
+                    }
                 }
             }
         }
@@ -708,13 +737,48 @@ impl GenSheet {
                 let get_neighbour_empty =
                     |dir| -> bool { neighbour_empty(config, &grid, pos, dir, None) };
 
+                let mut place_tile = |sheet: &DynamicImage, ix, iy| {
+                    let tile_image =
+                        sheet.view(ix * TILE_WIDTH, iy * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+                    overlay(base_image, &tile_image, x, y);
+                };
+
                 match tile {
-                    PlacedTile::Altar => {}
-                    PlacedTile::IdolAltar => {}
-                    PlacedTile::EggplantAltar => {}
-                    PlacedTile::ArrowTrap => {
+                    PlacedTile::AltarLeft => {
+                        place_tile(floormisc, 2, 0);
+                    }
+                    PlacedTile::AltarRight => {
+                        place_tile(floormisc, 3, 0);
+                    }
+                    PlacedTile::IdolAltarLeft => {
+                        place_tile(biome_sheet, 10, 0);
+                    }
+                    PlacedTile::IdolAltarRight => {
+                        place_tile(biome_sheet, 11, 0);
+
+                        let tile_image = sheets.items.view(
+                            15 * TILE_WIDTH,
+                            1 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        overlay(
+                            base_image,
+                            &tile_image,
+                            x - TILE_WIDTH / 2,
+                            y - TILE_HEIGHT + 18,
+                        );
+                    }
+                    PlacedTile::EggplantAltarLeft => {
+                        place_tile(biome_sheet, 11, 2);
+                    }
+                    PlacedTile::EggplantAltarRight => {
+                        place_tile(biome_sheet, 11, 2);
+                    }
+                    PlacedTile::ArrowTrap | PlacedTile::Laser => {
                         let (ix, iy) = match biome {
                             Biome::Sunken => (6, 0),
+                            Biome::Babylon => (5, 4),
                             _ => (1, 0),
                         };
 
@@ -725,7 +789,7 @@ impl GenSheet {
                             TILE_HEIGHT,
                         );
 
-                        let left = get_neighbour_empty(DIR_LEFT) || col_idx == 0;
+                        let left = get_neighbour_empty(DIR_LEFT);
                         if left {
                             let tile_image = flip_horizontal(&tile_image);
                             overlay(base_image, &tile_image, x, y);
@@ -739,59 +803,87 @@ impl GenSheet {
                             _ => (4, 1),
                         };
 
-                        let bottom_image = floormisc.view(
-                            ix * TILE_WIDTH,
-                            iy * TILE_HEIGHT,
-                            TILE_WIDTH,
-                            TILE_HEIGHT,
-                        );
-
-                        overlay(base_image, &bottom_image, x, y);
-
-                        let up = get_neighbour_empty(DIR_UP);
-                        if !up {
-                            let iy = iy - 1;
-                            let top_image = floormisc.view(
-                                ix * TILE_WIDTH,
-                                iy * TILE_HEIGHT,
-                                TILE_WIDTH,
-                                TILE_HEIGHT,
-                            );
-
-                            let x = col_idx as u32 * TILE_HEIGHT as u32;
-                            let y = (row_idx - 1) as u32 * TILE_WIDTH as u32;
-                            overlay(base_image, &top_image, x, y);
+                        let down = grid[row_idx - 1][col_idx] == *tile;
+                        if !down {
+                            place_tile(floormisc, ix, iy - 1);
+                        } else {
+                            place_tile(floormisc, ix, iy);
                         }
                     }
-                    PlacedTile::SpearTrap => {}
-                    PlacedTile::FrogTrap => {}
-                    PlacedTile::CrushTrap => {}
-                    PlacedTile::LargeCrushTrap => {}
-                    PlacedTile::BushBlock => {}
-                    PlacedTile::BoneBlock => {}
-                    PlacedTile::IceBlock => {}
+                    PlacedTile::SpearTrap => {
+                        place_tile(floormisc, 5, 3);
+                    }
+                    PlacedTile::FrogTrapLeft => {}
+                    PlacedTile::FrogTrapRight => {}
+                    PlacedTile::CrushTrap => {
+                        place_tile(floormisc, 0, 6);
+                    }
+                    PlacedTile::LargeCrushTrap => {
+                        let down = grid[row_idx - 1][col_idx] == *tile;
+                        let left = grid[row_idx][col_idx - 1] == *tile;
+                        if down && left {
+                            place_tile(floormisc, 1, 4);
+                        } else if down && !left {
+                            place_tile(floormisc, 0, 4);
+                        } else if !down && left {
+                            place_tile(floormisc, 1, 5);
+                        } else {
+                            place_tile(floormisc, 0, 5);
+                        }
+                    }
+                    PlacedTile::BushBlock => {
+                        place_tile(biome_sheet, 10, 2);
+                    }
+                    PlacedTile::BoneBlock => {
+                        place_tile(biome_sheet, 10, 2);
+                    }
+                    PlacedTile::IceBlock => {
+                        place_tile(biome_sheet, 7, 1);
+                    }
                     PlacedTile::ChainTop => {}
-                    PlacedTile::Laser => {}
-                    PlacedTile::Platform => {}
+                    PlacedTile::Platform => match biome {
+                        Biome::Cave | Biome::TidePool | Biome::Surface => {
+                            let (ix, iy) = match biome {
+                                Biome::TidePool => (7, 3),
+                                _ => (1, 1),
+                            };
+
+                            for i in 0..3 {
+                                let iy = iy + i;
+                                let y = y + i * TILE_HEIGHT;
+                                let tile_image = floormisc.view(
+                                    ix * TILE_WIDTH,
+                                    iy * TILE_HEIGHT,
+                                    TILE_WIDTH,
+                                    TILE_HEIGHT,
+                                );
+                                overlay(base_image, &tile_image, x, y);
+
+                                let row_idx = row_idx as u32 + i + 1;
+                                if row_idx == config.grid_height as u32
+                                    || grid[row_idx as usize][col_idx] != PlacedTile::None
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        Biome::Ice | Biome::Volcana => {
+                            place_tile(biome_sheet, 4, 5);
+                        }
+                        _ => {}
+                    },
                     PlacedTile::UdjatSocket => {}
-                    PlacedTile::Conveyor => {}
+                    PlacedTile::ConveyorLeft => {
+                        place_tile(biome_sheet, 11, 11);
+                    }
+                    PlacedTile::ConveyorRight => {
+                        place_tile(biome_sheet, 11, 10);
+                    }
                     PlacedTile::PushBlock => {
-                        let tile_image = biome_sheet.view(
-                            7 * TILE_WIDTH,
-                            0 * TILE_HEIGHT,
-                            TILE_WIDTH,
-                            TILE_HEIGHT,
-                        );
-                        overlay(base_image, &tile_image, x, y);
+                        place_tile(biome_sheet, 7, 0);
                     }
                     PlacedTile::PowderKeg => {
-                        let tile_image = floormisc.view(
-                            2 * TILE_WIDTH,
-                            2 * TILE_HEIGHT,
-                            TILE_WIDTH,
-                            TILE_HEIGHT,
-                        );
-                        overlay(base_image, &tile_image, x, y);
+                        place_tile(floormisc, 2, 2);
                     }
                     _ => {}
                 }
@@ -888,7 +980,9 @@ impl GenSheet {
                     // Place generic top-deco or spikes top-deco
                     if up {
                         let y = y - (TILE_HEIGHT / 2) + 4;
-                        if rng.gen::<u32>() % 12 == 0 {
+                        if rng.gen::<u32>() % 12 == 0
+                            && neighbour_empty(config, &grid, pos, DIR_UP, None)
+                        {
                             overlay(base_image, spikes_deco.choose(rng).unwrap(), x, y);
                         } else {
                             overlay(base_image, up_deco.choose(rng).unwrap(), x, y);
