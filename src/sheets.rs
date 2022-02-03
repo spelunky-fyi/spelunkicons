@@ -743,6 +743,18 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::Sunken => {
+                    let this = directions[&DIR_NONE];
+                    let left = directions[&DIR_LEFT];
+                    let right = directions[&DIR_RIGHT];
+                    if !this && (!left && right) {
+                        grid[row_idx][col_idx - 1] = PlacedTile::FrogTrapLeft;
+                        grid[row_idx][col_idx] = PlacedTile::FrogTrapRight;
+                    } else if !this && (left && !right) {
+                        grid[row_idx][col_idx] = PlacedTile::FrogTrapLeft;
+                        grid[row_idx][col_idx + 1] = PlacedTile::FrogTrapRight;
+                    }
+                }
                 _ => {}
             }
 
@@ -1006,8 +1018,12 @@ impl GenSheet {
                     PlacedTile::SpearTrap => {
                         place_tile(floormisc, 5, 3);
                     }
-                    PlacedTile::FrogTrapLeft => {}
-                    PlacedTile::FrogTrapRight => {}
+                    PlacedTile::FrogTrapLeft => {
+                        place_tile(biome_sheet, 8, 9);
+                    }
+                    PlacedTile::FrogTrapRight => {
+                        place_tile(biome_sheet, 9, 9);
+                    }
                     PlacedTile::CrushTrap => match biome {
                         Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 9, 0),
                         _ => place_tile(floorstyled_biome_sheet, 0, 6),
