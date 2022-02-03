@@ -186,6 +186,8 @@ enum PlacedTile {
     ConveyorRight,
     PushBlock,
     PowderKeg,
+    HoneyUp,
+    HoneyDown,
 }
 type PlacedTileGrid = Vec<Vec<PlacedTile>>;
 
@@ -572,6 +574,46 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::Jungle | Biome::Beehive => {
+                    let this =
+                        neighbour_empty(config, &grid, pos, DIR_NONE, Some(PlacedTile::Floor));
+                    if !this {
+                        let left = directions[&DIR_LEFT];
+                        let right = directions[&DIR_RIGHT];
+                        let up = directions[&DIR_UP];
+                        let down = directions[&DIR_DOWN];
+                        if left || right || up || down {
+                            grid[row_idx][col_idx] = PlacedTile::SpearTrap;
+                        }
+                    } else {
+                        match biome {
+                            Biome::Beehive => {
+                                let up_bee = neighbour_empty(
+                                    config,
+                                    &grid,
+                                    pos,
+                                    DIR_UP,
+                                    Some(PlacedTile::FloorStyled),
+                                );
+                                if !up_bee {
+                                    grid[row_idx][col_idx] = PlacedTile::HoneyUp;
+                                } else {
+                                    let down_bee = neighbour_empty(
+                                        config,
+                                        &grid,
+                                        pos,
+                                        DIR_DOWN,
+                                        Some(PlacedTile::FloorStyled),
+                                    );
+                                    if !down_bee {
+                                        grid[row_idx][col_idx] = PlacedTile::HoneyDown;
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
                 _ => {}
             }
 
@@ -884,6 +926,24 @@ impl GenSheet {
                     }
                     PlacedTile::PowderKeg => {
                         place_tile(floormisc, 2, 2);
+                    }
+                    PlacedTile::HoneyUp => {
+                        let tile_image = sheets.items.view(
+                            14 * TILE_WIDTH,
+                            14 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        overlay(base_image, &tile_image, x, y - 22);
+                    }
+                    PlacedTile::HoneyDown => {
+                        let tile_image = sheets.items.view(
+                            13 * TILE_WIDTH,
+                            14 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        overlay(base_image, &tile_image, x, y + 22);
                     }
                     _ => {}
                 }
