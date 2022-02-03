@@ -180,6 +180,8 @@ enum PlacedTile {
     BoneBlock,
     IceBlock,
     ChainTop,
+    ChainMid,
+    ChainBot,
     Platform,
     UdjatSocket,
     ConveyorLeft,
@@ -614,6 +616,67 @@ impl GenSheet {
                         }
                     }
                 }
+                Biome::Volcana => {
+                    let this = directions[&DIR_NONE];
+                    if this {
+                        let down = directions[&DIR_DOWN];
+                        let up = directions[&DIR_UP];
+                        if down && !up {
+                            grid[row_idx - 1][col_idx] = PlacedTile::ChainTop;
+                            for i in 0..4 {
+                                if row_idx + i as usize == config.grid_height as usize - 1
+                                    || i == 3
+                                    || grid[row_idx + i][col_idx] != PlacedTile::None
+                                {
+                                    grid[row_idx + i][col_idx] = PlacedTile::ChainBot;
+                                    break;
+                                } else {
+                                    grid[row_idx + i][col_idx] = PlacedTile::ChainMid;
+                                }
+                            }
+                        }
+                    } else {
+                        let up = directions[&DIR_UP];
+                        let down =
+                            neighbour_empty(config, &grid, pos, DIR_DOWN, Some(PlacedTile::Floor));
+                        if up && !down {
+                            let flip = rng.gen_bool(0.5);
+                            let tile = if flip {
+                                PlacedTile::ConveyorLeft
+                            } else {
+                                PlacedTile::ConveyorRight
+                            };
+
+                            grid[row_idx][col_idx] = tile;
+
+                            let left = directions[&DIR_LEFT];
+                            let up_left = directions[&DIR_UP_LEFT];
+                            let down_left = neighbour_empty(
+                                config,
+                                &grid,
+                                pos,
+                                DIR_DOWN_LEFT,
+                                Some(PlacedTile::Floor),
+                            );
+                            if left && up_left && !down_left {
+                                grid[row_idx][col_idx - 1] = tile;
+                            }
+
+                            let right = directions[&DIR_RIGHT];
+                            let up_right = directions[&DIR_UP_RIGHT];
+                            let down_right = neighbour_empty(
+                                config,
+                                &grid,
+                                pos,
+                                DIR_DOWN_RIGHT,
+                                Some(PlacedTile::Floor),
+                            );
+                            if right && up_right && !down_right {
+                                grid[row_idx][col_idx + 1] = tile;
+                            }
+                        }
+                    }
+                }
                 Biome::TidePool => {
                     let this = directions[&DIR_NONE];
                     if this {
@@ -940,7 +1003,17 @@ impl GenSheet {
                     PlacedTile::IceBlock => {
                         place_tile(biome_sheet, 7, 1);
                     }
-                    PlacedTile::ChainTop => {}
+                    PlacedTile::ChainTop => {
+                        place_tile(biome_sheet, 4, 0);
+                        place_tile(biome_sheet, 7, 1);
+                    }
+                    PlacedTile::ChainMid => {
+                        place_tile(biome_sheet, 4, 1);
+                    }
+                    PlacedTile::ChainBot => {
+                        place_tile(biome_sheet, 4, 2);
+                        place_tile(biome_sheet, 7, 3);
+                    }
                     PlacedTile::Platform => match biome {
                         Biome::Cave
                         | Biome::TidePool
