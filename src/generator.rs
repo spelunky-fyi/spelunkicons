@@ -8,7 +8,8 @@ use rand::prelude::*;
 use rand::SeedableRng;
 
 use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
-use crate::sheets::{Biome, GenKind, GenSheet, Sheets};
+use crate::grid_renderer::Sheets;
+use crate::sheets::{Biome, GenKind, GenSheet};
 use crate::spelunkicon::Spelunkicon;
 
 const OUTPUT_DIMENSION: u32 = 250;
