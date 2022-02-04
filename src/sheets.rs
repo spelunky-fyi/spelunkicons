@@ -1036,7 +1036,7 @@ impl GenSheet {
                     }
                     PlacedTile::CrushTrap => match biome {
                         Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 9, 0),
-                        _ => place_tile(floorstyled_biome_sheet, 0, 6),
+                        _ => place_tile(floormisc, 0, 6),
                     },
                     PlacedTile::LargeCrushTrapTopLeft => match biome {
                         Biome::CityOfGold => place_tile(floorstyled_biome_sheet, 6, 0),
