@@ -742,7 +742,7 @@ impl GridRenderer {
 
                     // Place generic deco
                     if left {
-                        let x = x - (TILE_WIDTH / 2) + 5;
+                        let x = x - (TILE_WIDTH / 2);
                         if up {
                             overlay(base_image, &left_up_deco, x, y);
                         } else {
@@ -751,7 +751,7 @@ impl GridRenderer {
                     }
 
                     if right {
-                        let x = x + (TILE_WIDTH / 2) - 5;
+                        let x = x + (TILE_WIDTH / 2);
                         if up {
                             overlay(base_image, &right_up_deco, x, y);
                         } else {
@@ -760,13 +760,13 @@ impl GridRenderer {
                     }
 
                     if down {
-                        let y = y + (TILE_HEIGHT / 2) - 12;
+                        let y = y + (TILE_HEIGHT / 2);
                         overlay(base_image, down_deco.choose(rng).unwrap(), x, y);
                     }
 
                     // Place generic top-deco or spikes top-deco
                     if up {
-                        let y_deco = y - (TILE_HEIGHT / 2) + 4;
+                        let y_deco = y - (TILE_HEIGHT / 2);
                         if has_spikes
                             && rng.gen::<u32>() % 12 == 0
                             && neighbour_empty(config, &grid, pos, DIR_UP, None)
