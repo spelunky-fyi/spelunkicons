@@ -240,26 +240,34 @@ impl GridGenerator {
                 };
             }
         } else {
-            match biome {
-                Biome::Beehive => {
-                    let up_bee =
-                        neighbour_empty(config, &grid, pos, DIR_UP, Some(PlacedTile::FloorStyled));
-                    if !up_bee {
-                        grid[y][x] = PlacedTile::HoneyUp;
-                    } else {
-                        let down_bee = neighbour_empty(
+            let this = neighbour_empty(config, &grid, pos, DIR_NONE, None);
+            if this {
+                match biome {
+                    Biome::Beehive => {
+                        let up_bee = neighbour_empty(
                             config,
                             &grid,
                             pos,
-                            DIR_DOWN,
+                            DIR_UP,
                             Some(PlacedTile::FloorStyled),
                         );
-                        if !down_bee {
-                            grid[y][x] = PlacedTile::HoneyDown;
+                        if !up_bee {
+                            grid[y][x] = PlacedTile::HoneyUp;
+                        } else {
+                            let down_bee = neighbour_empty(
+                                config,
+                                &grid,
+                                pos,
+                                DIR_DOWN,
+                                Some(PlacedTile::FloorStyled),
+                            );
+                            if !down_bee {
+                                grid[y][x] = PlacedTile::HoneyDown;
+                            }
                         }
                     }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
