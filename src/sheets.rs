@@ -1,4 +1,4 @@
-use image::imageops::{flip_horizontal, overlay};
+use image::imageops::{flip_horizontal, overlay, FilterType};
 use image::ImageFormat::Png;
 use image::{load_from_memory_with_format, DynamicImage, SubImage};
 use image::{GenericImageView, RgbaImage};
@@ -1055,7 +1055,21 @@ impl GenSheet {
                         place_tile(biome_sheet, 10, 2);
                     }
                     PlacedTile::IceBlock => {
-                        place_tile(biome_sheet, 7, 1);
+                        let tile_image = biome_sheet.view(
+                            7 * TILE_WIDTH,
+                            1 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        let tile_image = DynamicImage::ImageRgba8(tile_image.to_image());
+
+                        let overlap = 8;
+                        let tile_image = tile_image.resize(
+                            TILE_WIDTH + overlap,
+                            TILE_HEIGHT + overlap,
+                            FilterType::CatmullRom,
+                        );
+                        overlay(base_image, &tile_image, x - overlap / 2, y - overlap / 2);
                     }
                     PlacedTile::ChainTop => {
                         place_tile(biome_sheet, 4, 0);
