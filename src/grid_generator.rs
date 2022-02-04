@@ -174,6 +174,228 @@ impl GridGenerator {
         return grid;
     }
 
+    fn place_floormisc_cave(
+        &self,
+        _config: &Spelunkicon,
+        _rng: &mut StdRng,
+        grid: &mut PlacedTileGrid,
+        _biome: &Biome,
+        pos: (usize, usize),
+        directions: &HashMap<(i64, i64), bool>,
+    ) {
+        let (x, y) = pos;
+
+        let this = directions[&DIR_NONE];
+        if this {
+            let up = directions[&DIR_UP];
+            let down = directions[&DIR_DOWN];
+            if up && !down {
+                let left = directions[&DIR_LEFT];
+                let up_left = directions[&DIR_UP_LEFT];
+                let right = directions[&DIR_RIGHT];
+                let up_right = directions[&DIR_UP_RIGHT];
+
+                let misc_tile = if left && up_left && right && up_right {
+                    PlacedTile::TotemTrap
+                } else {
+                    PlacedTile::BoneBlock
+                };
+
+                grid[y][x] = misc_tile;
+                if y > 0 {
+                    grid[y - 1][x] = misc_tile;
+                }
+            }
+        } else {
+            let left = directions[&DIR_LEFT];
+            let right = directions[&DIR_RIGHT];
+            if left != right {
+                grid[y][x] = PlacedTile::ArrowTrap;
+            }
+        }
+    }
+
+    fn place_floormisc_jungle(
+        &self,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+        grid: &mut PlacedTileGrid,
+        biome: &Biome,
+        pos: (usize, usize),
+        directions: &HashMap<(i64, i64), bool>,
+    ) {
+        let (x, y) = pos;
+
+        let this = neighbour_empty(config, &grid, pos, DIR_NONE, Some(PlacedTile::Floor));
+        if !this {
+            let left = directions[&DIR_LEFT];
+            let right = directions[&DIR_RIGHT];
+            let up = directions[&DIR_UP];
+            let down = directions[&DIR_DOWN];
+            if left || right || up || down {
+                grid[y][x] = if rng.gen_bool(0.5) {
+                    PlacedTile::SpearTrap
+                } else {
+                    PlacedTile::BushBlock
+                };
+            }
+        } else {
+            match biome {
+                Biome::Beehive => {
+                    let up_bee =
+                        neighbour_empty(config, &grid, pos, DIR_UP, Some(PlacedTile::FloorStyled));
+                    if !up_bee {
+                        grid[y][x] = PlacedTile::HoneyUp;
+                    } else {
+                        let down_bee = neighbour_empty(
+                            config,
+                            &grid,
+                            pos,
+                            DIR_DOWN,
+                            Some(PlacedTile::FloorStyled),
+                        );
+                        if !down_bee {
+                            grid[y][x] = PlacedTile::HoneyDown;
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn place_floormisc_volcana(
+        &self,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+        grid: &mut PlacedTileGrid,
+        _biome: &Biome,
+        pos: (usize, usize),
+        directions: &HashMap<(i64, i64), bool>,
+    ) {
+        let (x, y) = pos;
+
+        let this = directions[&DIR_NONE];
+        if this {
+            let down = directions[&DIR_DOWN];
+            let up = directions[&DIR_UP];
+            if !down && rng.gen_bool(0.01) {
+                grid[y - 1][x] = PlacedTile::UdjatSocketTop;
+                grid[y][x] = PlacedTile::UdjatSocketBot;
+            } else if down && !up {
+                grid[y - 1][x] = PlacedTile::ChainTop;
+                for i in 0..4 {
+                    if y + i as usize == config.grid_height as usize - 1
+                        || i == 3
+                        || grid[y + i][x] != PlacedTile::None
+                    {
+                        grid[y + i][x] = PlacedTile::ChainBot;
+                        break;
+                    } else {
+                        grid[y + i][x] = PlacedTile::ChainMid;
+                    }
+                }
+            }
+        } else {
+            let up = directions[&DIR_UP];
+            let down = neighbour_empty(config, &grid, pos, DIR_DOWN, Some(PlacedTile::Floor));
+            if up && !down {
+                let flip = rng.gen_bool(0.5);
+                let tile = if flip {
+                    PlacedTile::ConveyorLeft
+                } else {
+                    PlacedTile::ConveyorRight
+                };
+
+                grid[y][x] = tile;
+
+                let left = directions[&DIR_LEFT];
+                let up_left = directions[&DIR_UP_LEFT];
+                let down_left =
+                    neighbour_empty(config, &grid, pos, DIR_DOWN_LEFT, Some(PlacedTile::Floor));
+                if left && up_left && !down_left {
+                    grid[y][x - 1] = tile;
+                }
+
+                let right = directions[&DIR_RIGHT];
+                let up_right = directions[&DIR_UP_RIGHT];
+                let down_right =
+                    neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, Some(PlacedTile::Floor));
+                if right && up_right && !down_right {
+                    grid[y][x + 1] = tile;
+                }
+            }
+        }
+    }
+
+    fn place_floormisc_tidepool(
+        &self,
+        _config: &Spelunkicon,
+        _rng: &mut StdRng,
+        grid: &mut PlacedTileGrid,
+        _biome: &Biome,
+        pos: (usize, usize),
+        directions: &HashMap<(i64, i64), bool>,
+    ) {
+        let (x, y) = pos;
+
+        let this = directions[&DIR_NONE];
+        if this {
+            let up = directions[&DIR_UP];
+            let down = directions[&DIR_DOWN];
+            if up && !down {
+                let left = directions[&DIR_LEFT];
+                let up_left = directions[&DIR_UP_LEFT];
+                let right = directions[&DIR_RIGHT];
+                let up_right = directions[&DIR_UP_RIGHT];
+
+                if left && up_left && right && up_right {
+                    grid[y][x] = PlacedTile::LionTrap;
+                    if y > 0 {
+                        grid[y - 1][x] = PlacedTile::LionTrap;
+                    }
+                };
+            }
+        }
+    }
+
+    fn place_floormisc_temple(
+        &self,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+        grid: &mut PlacedTileGrid,
+        _biome: &Biome,
+        pos: (usize, usize),
+        directions: &HashMap<(i64, i64), bool>,
+    ) {
+        let (x, y) = pos;
+
+        let floor = Some(PlacedTile::Floor);
+        let floor_styled = Some(PlacedTile::FloorStyled);
+        let this = neighbour_empty(config, &grid, pos, DIR_NONE, floor)
+            && neighbour_empty(config, &grid, pos, DIR_NONE, floor_styled);
+        if !this {
+            let right = neighbour_empty(config, &grid, pos, DIR_RIGHT, floor)
+                && neighbour_empty(config, &grid, pos, DIR_RIGHT, floor_styled);
+            let down = neighbour_empty(config, &grid, pos, DIR_DOWN, floor)
+                && neighbour_empty(config, &grid, pos, DIR_DOWN, floor_styled);
+            let down_right = neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor)
+                && neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor_styled);
+            if !right && !down && !down_right && rng.gen_bool(0.5) {
+                grid[y][x] = PlacedTile::LargeCrushTrapTopLeft;
+                grid[y][x + 1] = PlacedTile::LargeCrushTrapTopRight;
+                grid[y + 1][x] = PlacedTile::LargeCrushTrapBotLeft;
+                grid[y + 1][x + 1] = PlacedTile::LargeCrushTrapBotRight;
+            } else {
+                let left = directions[&DIR_LEFT];
+                let up = directions[&DIR_UP];
+                if left || right || up || down {
+                    grid[y][x] = PlacedTile::CrushTrap;
+                }
+            }
+        }
+    }
+
     pub fn place_floormisc_tiles(
         &self,
         biome: &Biome,
@@ -212,190 +434,46 @@ impl GridGenerator {
             let before = grid[row_idx][col_idx];
 
             match biome {
-                Biome::Cave => {
-                    let this = directions[&DIR_NONE];
-                    if this {
-                        let up = directions[&DIR_UP];
-                        let down = directions[&DIR_DOWN];
-                        if up && !down {
-                            let left = directions[&DIR_LEFT];
-                            let up_left = directions[&DIR_UP_LEFT];
-                            let right = directions[&DIR_RIGHT];
-                            let up_right = directions[&DIR_UP_RIGHT];
-
-                            let misc_tile = if left && up_left && right && up_right {
-                                PlacedTile::TotemTrap
-                            } else {
-                                PlacedTile::BoneBlock
-                            };
-
-                            grid[row_idx][col_idx] = misc_tile;
-                            if row_idx > 0 {
-                                grid[row_idx - 1][col_idx] = misc_tile;
-                            }
-                        }
-                    } else {
-                        let left = directions[&DIR_LEFT];
-                        let right = directions[&DIR_RIGHT];
-                        if left != right {
-                            grid[row_idx][col_idx] = PlacedTile::ArrowTrap;
-                        }
-                    }
-                }
-                Biome::Jungle | Biome::Beehive => {
-                    let this =
-                        neighbour_empty(config, &grid, pos, DIR_NONE, Some(PlacedTile::Floor));
-                    if !this {
-                        let left = directions[&DIR_LEFT];
-                        let right = directions[&DIR_RIGHT];
-                        let up = directions[&DIR_UP];
-                        let down = directions[&DIR_DOWN];
-                        if left || right || up || down {
-                            grid[row_idx][col_idx] = if rng.gen_bool(0.5) {
-                                PlacedTile::SpearTrap
-                            } else {
-                                PlacedTile::BushBlock
-                            };
-                        }
-                    } else {
-                        match biome {
-                            Biome::Beehive => {
-                                let up_bee = neighbour_empty(
-                                    config,
-                                    &grid,
-                                    pos,
-                                    DIR_UP,
-                                    Some(PlacedTile::FloorStyled),
-                                );
-                                if !up_bee {
-                                    grid[row_idx][col_idx] = PlacedTile::HoneyUp;
-                                } else {
-                                    let down_bee = neighbour_empty(
-                                        config,
-                                        &grid,
-                                        pos,
-                                        DIR_DOWN,
-                                        Some(PlacedTile::FloorStyled),
-                                    );
-                                    if !down_bee {
-                                        grid[row_idx][col_idx] = PlacedTile::HoneyDown;
-                                    }
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-                Biome::Volcana => {
-                    let this = directions[&DIR_NONE];
-                    if this {
-                        let down = directions[&DIR_DOWN];
-                        let up = directions[&DIR_UP];
-                        if !down && rng.gen_bool(0.01) {
-                            grid[row_idx - 1][col_idx] = PlacedTile::UdjatSocketTop;
-                            grid[row_idx][col_idx] = PlacedTile::UdjatSocketBot;
-                        } else if down && !up {
-                            grid[row_idx - 1][col_idx] = PlacedTile::ChainTop;
-                            for i in 0..4 {
-                                if row_idx + i as usize == config.grid_height as usize - 1
-                                    || i == 3
-                                    || grid[row_idx + i][col_idx] != PlacedTile::None
-                                {
-                                    grid[row_idx + i][col_idx] = PlacedTile::ChainBot;
-                                    break;
-                                } else {
-                                    grid[row_idx + i][col_idx] = PlacedTile::ChainMid;
-                                }
-                            }
-                        }
-                    } else {
-                        let up = directions[&DIR_UP];
-                        let down =
-                            neighbour_empty(config, &grid, pos, DIR_DOWN, Some(PlacedTile::Floor));
-                        if up && !down {
-                            let flip = rng.gen_bool(0.5);
-                            let tile = if flip {
-                                PlacedTile::ConveyorLeft
-                            } else {
-                                PlacedTile::ConveyorRight
-                            };
-
-                            grid[row_idx][col_idx] = tile;
-
-                            let left = directions[&DIR_LEFT];
-                            let up_left = directions[&DIR_UP_LEFT];
-                            let down_left = neighbour_empty(
-                                config,
-                                &grid,
-                                pos,
-                                DIR_DOWN_LEFT,
-                                Some(PlacedTile::Floor),
-                            );
-                            if left && up_left && !down_left {
-                                grid[row_idx][col_idx - 1] = tile;
-                            }
-
-                            let right = directions[&DIR_RIGHT];
-                            let up_right = directions[&DIR_UP_RIGHT];
-                            let down_right = neighbour_empty(
-                                config,
-                                &grid,
-                                pos,
-                                DIR_DOWN_RIGHT,
-                                Some(PlacedTile::Floor),
-                            );
-                            if right && up_right && !down_right {
-                                grid[row_idx][col_idx + 1] = tile;
-                            }
-                        }
-                    }
-                }
-                Biome::TidePool => {
-                    let this = directions[&DIR_NONE];
-                    if this {
-                        let up = directions[&DIR_UP];
-                        let down = directions[&DIR_DOWN];
-                        if up && !down {
-                            let left = directions[&DIR_LEFT];
-                            let up_left = directions[&DIR_UP_LEFT];
-                            let right = directions[&DIR_RIGHT];
-                            let up_right = directions[&DIR_UP_RIGHT];
-
-                            if left && up_left && right && up_right {
-                                grid[row_idx][col_idx] = PlacedTile::LionTrap;
-                                if row_idx > 0 {
-                                    grid[row_idx - 1][col_idx] = PlacedTile::LionTrap;
-                                }
-                            };
-                        }
-                    }
-                }
-                Biome::Temple | Biome::CityOfGold => {
-                    let floor = Some(PlacedTile::Floor);
-                    let floor_styled = Some(PlacedTile::FloorStyled);
-                    let this = neighbour_empty(config, &grid, pos, DIR_NONE, floor)
-                        && neighbour_empty(config, &grid, pos, DIR_NONE, floor_styled);
-                    if !this {
-                        let right = neighbour_empty(config, &grid, pos, DIR_RIGHT, floor)
-                            && neighbour_empty(config, &grid, pos, DIR_RIGHT, floor_styled);
-                        let down = neighbour_empty(config, &grid, pos, DIR_DOWN, floor)
-                            && neighbour_empty(config, &grid, pos, DIR_DOWN, floor_styled);
-                        let down_right = neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor)
-                            && neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor_styled);
-                        if !right && !down && !down_right && rng.gen_bool(0.5) {
-                            grid[row_idx][col_idx] = PlacedTile::LargeCrushTrapTopLeft;
-                            grid[row_idx][col_idx + 1] = PlacedTile::LargeCrushTrapTopRight;
-                            grid[row_idx + 1][col_idx] = PlacedTile::LargeCrushTrapBotLeft;
-                            grid[row_idx + 1][col_idx + 1] = PlacedTile::LargeCrushTrapBotRight;
-                        } else {
-                            let left = directions[&DIR_LEFT];
-                            let up = directions[&DIR_UP];
-                            if left || right || up || down {
-                                grid[row_idx][col_idx] = PlacedTile::CrushTrap;
-                            }
-                        }
-                    }
-                }
+                Biome::Cave => self.place_floormisc_cave(
+                    config,
+                    rng,
+                    &mut grid,
+                    biome,
+                    (col_idx, row_idx),
+                    &directions,
+                ),
+                Biome::Jungle | Biome::Beehive => self.place_floormisc_jungle(
+                    config,
+                    rng,
+                    &mut grid,
+                    biome,
+                    (col_idx, row_idx),
+                    &directions,
+                ),
+                Biome::Volcana => self.place_floormisc_volcana(
+                    config,
+                    rng,
+                    &mut grid,
+                    biome,
+                    (col_idx, row_idx),
+                    &directions,
+                ),
+                Biome::TidePool => self.place_floormisc_tidepool(
+                    config,
+                    rng,
+                    &mut grid,
+                    biome,
+                    (col_idx, row_idx),
+                    &directions,
+                ),
+                Biome::Temple | Biome::CityOfGold => self.place_floormisc_temple(
+                    config,
+                    rng,
+                    &mut grid,
+                    biome,
+                    (col_idx, row_idx),
+                    &directions,
+                ),
                 Biome::Ice => {
                     let this = directions[&DIR_NONE];
                     if !this {
