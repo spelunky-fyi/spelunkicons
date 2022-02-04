@@ -154,7 +154,7 @@ pub enum GenSheet {
     FloorAndFloorStyled(Biome),
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 enum PlacedTile {
     None,
     Floor,
@@ -1227,10 +1227,30 @@ impl GenSheet {
             sheet_image.view(7 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
         ];
 
+        let has_spikes = match biome {
+            Biome::Volcana
+            | Biome::TidePool
+            | Biome::Sunken
+            | Biome::Jungle
+            | Biome::Ice
+            | Biome::Eggplant
+            | Biome::Cave => true,
+            _ => false,
+        };
+        let spikes = vec![
+            sheet_image.view(5 * TILE_WIDTH, 9 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            sheet_image.view(6 * TILE_WIDTH, 9 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            sheet_image.view(7 * TILE_WIDTH, 9 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+        ];
         let spikes_deco = vec![
             sheet_image.view(5 * TILE_WIDTH, 8 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
             sheet_image.view(6 * TILE_WIDTH, 8 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
             sheet_image.view(7 * TILE_WIDTH, 8 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+        ];
+        let spikes_blood = vec![
+            sheet_image.view(5 * TILE_WIDTH, 10 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            sheet_image.view(6 * TILE_WIDTH, 10 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            sheet_image.view(7 * TILE_WIDTH, 10 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
         ];
 
         let down_deco = vec![
@@ -1285,13 +1305,20 @@ impl GenSheet {
 
                     // Place generic top-deco or spikes top-deco
                     if up {
-                        let y = y - (TILE_HEIGHT / 2) + 4;
-                        if rng.gen::<u32>() % 12 == 0
+                        let y_deco = y - (TILE_HEIGHT / 2) + 4;
+                        if has_spikes
+                            && rng.gen::<u32>() % 12 == 0
                             && neighbour_empty(config, &grid, pos, DIR_UP, None)
                         {
-                            overlay(base_image, spikes_deco.choose(rng).unwrap(), x, y);
+                            let y = y - TILE_HEIGHT;
+                            let spikes_choice = rng.gen_range(0..spikes.len());
+                            overlay(base_image, &spikes[spikes_choice], x, y);
+                            overlay(base_image, &spikes_deco[spikes_choice], x, y_deco);
+                            if rng.gen_bool(0.1) {
+                                overlay(base_image, &spikes_blood[spikes_choice], x, y);
+                            }
                         } else {
-                            overlay(base_image, up_deco.choose(rng).unwrap(), x, y);
+                            overlay(base_image, up_deco.choose(rng).unwrap(), x, y_deco);
                         }
                     }
                 }
