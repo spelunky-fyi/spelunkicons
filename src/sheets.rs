@@ -529,7 +529,7 @@ impl GenSheet {
 
         // Try to place a few floormisc stuff
         // We are trying more than we want because most of those will be invalid anyways
-        for _ in 0..8 {
+        for _ in 0..config.max_misc {
             // Don't place these things right on the border, makes some stuff easier
             let col_idx = rng.gen::<usize>() % (config.grid_height as usize - 2) + 1;
             let row_idx = rng.gen::<usize>() % (config.grid_width as usize - 2) + 1;

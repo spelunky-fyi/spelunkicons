@@ -16,6 +16,7 @@ use crate::spelunkicon::Spelunkicon;
 const MAX_INPUT: usize = 64;
 static VALID_SIZES: &[&str] = &["4", "6", "8"];
 static DEFAULT_SIZE: &str = "6";
+static DEFAULT_MISC: &str = "2";
 static PNG_SUFFIX: &str = ".png";
 
 pub struct IconService {
@@ -91,8 +92,16 @@ impl Service<Request<Body>> for IconService {
         }
         let size = size.parse::<u8>().unwrap();
 
+        let max_misc = params
+            .get("misc")
+            .cloned()
+            .unwrap_or(String::from(DEFAULT_MISC))
+            .parse::<u32>()
+            .unwrap()
+            .clamp(0, 255) as u8;
+
         // Generate the PNG
-        let config = Spelunkicon::from_input(&input, size);
+        let config = Spelunkicon::from_input(&input, size, max_misc);
         let png = match self.generator.make_png(config) {
             Some(png) => png,
             None => {
