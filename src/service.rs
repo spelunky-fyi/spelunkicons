@@ -92,13 +92,18 @@ impl Service<Request<Body>> for IconService {
         }
         let size = size.parse::<u8>().unwrap();
 
-        let max_misc = params
+        let max_misc = match params
             .get("misc")
             .cloned()
             .unwrap_or(String::from(DEFAULT_MISC))
             .parse::<u32>()
-            .unwrap()
-            .clamp(0, 255) as u8;
+        {
+            Ok(misc) => misc.clamp(0, 255) as u8,
+            Err(_) => {
+                *response.status_mut() = StatusCode::BAD_REQUEST;
+                return Box::pin(async { Ok(response) });
+            }
+        };
 
         // Generate the PNG
         let config = Spelunkicon::from_input(&input, size, max_misc);
