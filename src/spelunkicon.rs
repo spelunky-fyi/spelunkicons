@@ -4,12 +4,13 @@ use bitvec::view::BitView;
 pub struct Spelunkicon {
     pub grid_width: u8,
     pub grid_height: u8,
+    pub max_misc: u8,
     pub hash: u32,
     pub grid: Vec<Vec<bool>>,
 }
 
 impl Spelunkicon {
-    pub fn from_input(input: &str, height: u8) -> Self {
+    pub fn from_input(input: &str, height: u8, max_misc: u8) -> Self {
         let grid_width = height;
         let grid_height = height;
 
@@ -40,6 +41,7 @@ impl Spelunkicon {
         Spelunkicon {
             grid_height,
             grid_width,
+            max_misc,
             hash,
             grid,
         }

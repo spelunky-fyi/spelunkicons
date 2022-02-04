@@ -29,7 +29,7 @@ static PNGS: &'static [(&str, &str)] = &[
     ("FLOORSTYLED_TEMPLE", "floorstyled_temple.png"),
     ("FLOORSTYLED_VLAD", "floorstyled_vlad.png"),
     ("FLOORSTYLED_WOOD", "floorstyled_wood.png"),
-    // ("FLOORMISC", "floormisc.png"),
+    ("FLOORMISC", "floormisc.png"),
     ("ITEMS", "items.png"),
 ];
 
