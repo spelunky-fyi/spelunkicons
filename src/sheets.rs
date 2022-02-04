@@ -592,7 +592,11 @@ impl GenSheet {
                         let up = directions[&DIR_UP];
                         let down = directions[&DIR_DOWN];
                         if left || right || up || down {
-                            grid[row_idx][col_idx] = PlacedTile::SpearTrap;
+                            grid[row_idx][col_idx] = if rng.gen_bool(0.5) {
+                                PlacedTile::SpearTrap
+                            } else {
+                                PlacedTile::BushBlock
+                            };
                         }
                     } else {
                         match biome {
