@@ -712,11 +712,17 @@ impl GenSheet {
                     }
                 }
                 Biome::Temple | Biome::CityOfGold => {
-                    let this = directions[&DIR_NONE];
+                    let floor = Some(PlacedTile::Floor);
+                    let floor_styled = Some(PlacedTile::FloorStyled);
+                    let this = neighbour_empty(config, &grid, pos, DIR_NONE, floor)
+                        && neighbour_empty(config, &grid, pos, DIR_NONE, floor_styled);
                     if !this {
-                        let right = directions[&DIR_RIGHT];
-                        let down = directions[&DIR_DOWN];
-                        let down_right = directions[&DIR_DOWN_RIGHT];
+                        let right = neighbour_empty(config, &grid, pos, DIR_RIGHT, floor)
+                            && neighbour_empty(config, &grid, pos, DIR_RIGHT, floor_styled);
+                        let down = neighbour_empty(config, &grid, pos, DIR_DOWN, floor)
+                            && neighbour_empty(config, &grid, pos, DIR_DOWN, floor_styled);
+                        let down_right = neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor)
+                            && neighbour_empty(config, &grid, pos, DIR_DOWN_RIGHT, floor_styled);
                         if !right && !down && !down_right && rng.gen_bool(0.5) {
                             grid[row_idx][col_idx] = PlacedTile::LargeCrushTrapTopLeft;
                             grid[row_idx][col_idx + 1] = PlacedTile::LargeCrushTrapTopRight;
