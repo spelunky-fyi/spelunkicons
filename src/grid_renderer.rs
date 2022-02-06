@@ -479,7 +479,11 @@ impl GridRenderer {
                             _ => (4, 1),
                         };
 
-                        let down = grid[row_idx - 1][col_idx] == *tile;
+                        // Avoid subtracting from index if it's 0
+                        let down = match row_idx > 0 {
+                            false => false,
+                            true => grid[row_idx - 1][col_idx] == *tile,
+                        };
                         if !down {
                             place_tile(floormisc, ix, iy - 1);
                         } else {
