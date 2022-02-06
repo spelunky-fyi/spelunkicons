@@ -253,7 +253,7 @@ impl Sheets {
         }
     }
 
-    fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
         match biome {
             Biome::Cave => Some(&self.floor_cave),
             Biome::Jungle | Biome::Beehive => Some(&self.floor_jungle),
@@ -270,7 +270,7 @@ impl Sheets {
         }
     }
 
-    fn sheet_floorstyled_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floorstyled_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
         match biome {
             Biome::Cave => Some(&self.floorstyled_wood),
             Biome::Jungle => Some(&self.floorstyled_stone),

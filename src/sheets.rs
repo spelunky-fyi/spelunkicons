@@ -1,6 +1,7 @@
 use image::RgbaImage;
 use rand::prelude::*;
 
+use crate::egg_renderer::PrideRenderer;
 use crate::grid_generator::*;
 use crate::grid_renderer::{GridRenderer, Sheets};
 use crate::spelunkicon::Spelunkicon;
@@ -30,12 +31,14 @@ pub enum GenKind {
     Floor,
     FloorStyled,
     FloorAndFloorStyled,
+    Pride,
 }
 
 pub enum GenSheet {
     Floor(Biome),
     FloorStyled(Biome),
     FloorAndFloorStyled(Biome),
+    Pride(),
 }
 
 impl GenSheet {
@@ -44,6 +47,7 @@ impl GenSheet {
             GenKind::Floor => GenSheet::Floor(biome),
             GenKind::FloorStyled => GenSheet::FloorStyled(biome),
             GenKind::FloorAndFloorStyled => GenSheet::FloorAndFloorStyled(biome),
+            GenKind::Pride => GenSheet::Pride(),
         }
     }
 
@@ -87,6 +91,10 @@ impl GenSheet {
                 renderer.render_floormisc_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floor_decorations(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floor_embeds(base_image, sheets, config, rng, &floor);
+            }
+            GenSheet::Pride() => {
+                let renderer = PrideRenderer {};
+                renderer.render(base_image, sheets, config, rng);
             }
         }
     }

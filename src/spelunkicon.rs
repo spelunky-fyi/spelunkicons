@@ -5,6 +5,7 @@ pub struct Spelunkicon {
     pub grid_width: u8,
     pub grid_height: u8,
     pub max_misc: u8,
+    pub input: String,
     pub hash: u32,
     pub grid: Vec<Vec<bool>>,
 }
@@ -38,10 +39,12 @@ impl Spelunkicon {
             grid.push(grid_row);
         }
 
+        let input = input.to_string();
         Spelunkicon {
             grid_height,
             grid_width,
             max_misc,
+            input,
             hash,
             grid,
         }
