@@ -821,20 +821,14 @@ impl GridRenderer {
                     }
                     PlacedTile::BushBlock => {
                         let left_deco = sheets.floor_jungle.view(
-                            11 * TILE_WIDTH,
-                            3 * TILE_HEIGHT,
-                            TILE_WIDTH,
-                            TILE_HEIGHT,
-                        );
-                        let right_deco = sheets.floor_jungle.view(
                             10 * TILE_WIDTH,
                             3 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        let up_deco = sheets.floor_jungle.view(
+                        let right_deco = sheets.floor_jungle.view(
                             11 * TILE_WIDTH,
-                            2 * TILE_HEIGHT,
+                            3 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
@@ -847,8 +841,25 @@ impl GridRenderer {
 
                         overlay(base_image, &left_deco, x - (TILE_WIDTH / 2), y);
                         overlay(base_image, &right_deco, x + (TILE_WIDTH / 2), y);
-                        overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
                         overlay(base_image, &down_deco, x, y + (TILE_HEIGHT / 2));
+
+                        let up = neighbour_empty(config, &grid, pos, DIR_UP, None)
+                            || !neighbour_empty(
+                                config,
+                                &grid,
+                                pos,
+                                DIR_UP,
+                                Some(PlacedTile::BushBlock),
+                            );
+                        if up {
+                            let up_deco = sheets.floor_jungle.view(
+                                11 * TILE_WIDTH,
+                                2 * TILE_HEIGHT,
+                                TILE_WIDTH,
+                                TILE_HEIGHT,
+                            );
+                            overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
+                        }
                     }
                     _ => {}
                 }
