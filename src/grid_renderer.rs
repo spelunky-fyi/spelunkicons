@@ -729,13 +729,13 @@ impl GridRenderer {
                 let x = col_idx as u32 * TILE_HEIGHT as u32;
                 let y = row_idx as u32 * TILE_WIDTH as u32;
 
+                let pos = (col_idx, row_idx);
+                let get_neighbour_empty = |dir| -> bool {
+                    neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::Floor))
+                };
+
                 match tile {
                     PlacedTile::Floor => {
-                        let pos = (col_idx, row_idx);
-                        let get_neighbour_empty = |dir| -> bool {
-                            neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::Floor))
-                        };
-
                         let left = get_neighbour_empty(DIR_LEFT);
                         let right = get_neighbour_empty(DIR_RIGHT);
                         let up = get_neighbour_empty(DIR_UP);
@@ -782,6 +782,41 @@ impl GridRenderer {
                             } else {
                                 overlay(base_image, up_deco.choose(rng).unwrap(), x, y_deco);
                             }
+                        }
+                    }
+                    PlacedTile::BoneBlock => {
+                        let left_deco = sheets.floor_cave.view(
+                            10 * TILE_WIDTH,
+                            3 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        let right_deco = sheets.floor_cave.view(
+                            11 * TILE_WIDTH,
+                            3 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+
+                        overlay(base_image, &left_deco, x - (TILE_WIDTH / 2) + 16, y);
+                        overlay(base_image, &right_deco, x + (TILE_WIDTH / 2), y);
+
+                        let up = neighbour_empty(config, &grid, pos, DIR_UP, None)
+                            || !neighbour_empty(
+                                config,
+                                &grid,
+                                pos,
+                                DIR_UP,
+                                Some(PlacedTile::BoneBlock),
+                            );
+                        if up {
+                            let up_deco = sheets.floor_cave.view(
+                                11 * TILE_WIDTH,
+                                2 * TILE_HEIGHT,
+                                TILE_WIDTH,
+                                TILE_HEIGHT,
+                            );
+                            overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
                         }
                     }
                     PlacedTile::BushBlock => {
