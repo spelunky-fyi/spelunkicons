@@ -724,68 +724,98 @@ impl GridRenderer {
             sheet_image.view(7 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
         ];
 
-        for (row_idx, row) in config.grid.iter().enumerate() {
-            for (col_idx, col) in row.iter().enumerate() {
-                if *col {
-                    continue;
-                }
+        for (row_idx, row) in grid.iter().enumerate() {
+            for (col_idx, tile) in row.iter().enumerate() {
+                let x = col_idx as u32 * TILE_HEIGHT as u32;
+                let y = row_idx as u32 * TILE_WIDTH as u32;
 
-                if grid[row_idx as usize][col_idx as usize] == PlacedTile::Floor {
-                    let x = col_idx as u32 * TILE_HEIGHT as u32;
-                    let y = row_idx as u32 * TILE_WIDTH as u32;
+                match tile {
+                    PlacedTile::Floor => {
+                        let pos = (col_idx, row_idx);
+                        let get_neighbour_empty = |dir| -> bool {
+                            neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::Floor))
+                        };
 
-                    let pos = (col_idx, row_idx);
-                    let get_neighbour_empty = |dir| -> bool {
-                        neighbour_empty(config, &grid, pos, dir, Some(PlacedTile::Floor))
-                    };
+                        let left = get_neighbour_empty(DIR_LEFT);
+                        let right = get_neighbour_empty(DIR_RIGHT);
+                        let up = get_neighbour_empty(DIR_UP);
+                        let down = get_neighbour_empty(DIR_DOWN);
 
-                    let left = get_neighbour_empty(DIR_LEFT);
-                    let right = get_neighbour_empty(DIR_RIGHT);
-                    let up = get_neighbour_empty(DIR_UP);
-                    let down = get_neighbour_empty(DIR_DOWN);
-
-                    // Place generic deco
-                    if left {
-                        let x = x - (TILE_WIDTH / 2);
-                        if up {
-                            overlay(base_image, &left_up_deco, x, y);
-                        } else {
-                            overlay(base_image, left_deco.choose(rng).unwrap(), x, y);
-                        }
-                    }
-
-                    if right {
-                        let x = x + (TILE_WIDTH / 2);
-                        if up {
-                            overlay(base_image, &right_up_deco, x, y);
-                        } else {
-                            overlay(base_image, right_deco.choose(rng).unwrap(), x, y);
-                        }
-                    }
-
-                    if down {
-                        let y = y + (TILE_HEIGHT / 2);
-                        overlay(base_image, down_deco.choose(rng).unwrap(), x, y);
-                    }
-
-                    // Place generic top-deco or spikes top-deco
-                    if up {
-                        let y_deco = y - (TILE_HEIGHT / 2);
-                        if has_spikes
-                            && rng.gen::<u32>() % 12 == 0
-                            && neighbour_empty(config, &grid, pos, DIR_UP, None)
-                        {
-                            let y = y - TILE_HEIGHT;
-                            let spikes_choice = rng.gen_range(0..spikes.len());
-                            overlay(base_image, &spikes[spikes_choice], x, y);
-                            overlay(base_image, &spikes_deco[spikes_choice], x, y_deco);
-                            if rng.gen_bool(0.1) {
-                                overlay(base_image, &spikes_blood[spikes_choice], x, y);
+                        // Place generic deco
+                        if left {
+                            let x = x - (TILE_WIDTH / 2);
+                            if up {
+                                overlay(base_image, &left_up_deco, x, y);
+                            } else {
+                                overlay(base_image, left_deco.choose(rng).unwrap(), x, y);
                             }
-                        } else {
-                            overlay(base_image, up_deco.choose(rng).unwrap(), x, y_deco);
+                        }
+
+                        if right {
+                            let x = x + (TILE_WIDTH / 2);
+                            if up {
+                                overlay(base_image, &right_up_deco, x, y);
+                            } else {
+                                overlay(base_image, right_deco.choose(rng).unwrap(), x, y);
+                            }
+                        }
+
+                        if down {
+                            let y = y + (TILE_HEIGHT / 2);
+                            overlay(base_image, down_deco.choose(rng).unwrap(), x, y);
+                        }
+
+                        // Place generic top-deco or spikes top-deco
+                        if up {
+                            let y_deco = y - (TILE_HEIGHT / 2);
+                            if has_spikes
+                                && rng.gen::<u32>() % 12 == 0
+                                && neighbour_empty(config, &grid, pos, DIR_UP, None)
+                            {
+                                let y = y - TILE_HEIGHT;
+                                let spikes_choice = rng.gen_range(0..spikes.len());
+                                overlay(base_image, &spikes[spikes_choice], x, y);
+                                overlay(base_image, &spikes_deco[spikes_choice], x, y_deco);
+                                if rng.gen_bool(0.1) {
+                                    overlay(base_image, &spikes_blood[spikes_choice], x, y);
+                                }
+                            } else {
+                                overlay(base_image, up_deco.choose(rng).unwrap(), x, y_deco);
+                            }
                         }
                     }
+                    PlacedTile::BushBlock => {
+                        let left_deco = sheets.floor_jungle.view(
+                            11 * TILE_WIDTH,
+                            3 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        let right_deco = sheets.floor_jungle.view(
+                            10 * TILE_WIDTH,
+                            3 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        let up_deco = sheets.floor_jungle.view(
+                            11 * TILE_WIDTH,
+                            2 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        let down_deco = sheets.floor_jungle.view(
+                            10 * TILE_WIDTH,
+                            4 * TILE_HEIGHT,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+
+                        overlay(base_image, &left_deco, x - (TILE_WIDTH / 2), y);
+                        overlay(base_image, &right_deco, x + (TILE_WIDTH / 2), y);
+                        overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
+                        overlay(base_image, &down_deco, x, y + (TILE_HEIGHT / 2));
+                    }
+                    _ => {}
                 }
             }
         }
