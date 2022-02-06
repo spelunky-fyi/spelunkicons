@@ -801,15 +801,15 @@ impl GridRenderer {
                         overlay(base_image, &left_deco, x - (TILE_WIDTH / 2) + 16, y);
                         overlay(base_image, &right_deco, x + (TILE_WIDTH / 2), y);
 
-                        let up = neighbour_empty(config, &grid, pos, DIR_UP, None)
-                            || !neighbour_empty(
-                                config,
-                                &grid,
-                                pos,
-                                DIR_UP,
-                                Some(PlacedTile::BoneBlock),
-                            );
-                        if up {
+                        let up_empty = neighbour_empty(config, &grid, pos, DIR_UP, None);
+                        let up_bone = !neighbour_empty(
+                            config,
+                            &grid,
+                            pos,
+                            DIR_UP,
+                            Some(PlacedTile::BoneBlock),
+                        );
+                        if up_empty || up_bone {
                             let up_deco = sheets.floor_cave.view(
                                 11 * TILE_WIDTH,
                                 2 * TILE_HEIGHT,
@@ -817,6 +817,22 @@ impl GridRenderer {
                                 TILE_HEIGHT,
                             );
                             overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
+                        }
+                        if up_empty && rng.gen_bool(0.5) {
+                            let ribcage = sheets.items.view(
+                                14 * TILE_WIDTH,
+                                3 * TILE_HEIGHT,
+                                TILE_WIDTH,
+                                TILE_HEIGHT,
+                            );
+                            let skull = sheets.items.view(
+                                15 * TILE_WIDTH,
+                                3 * TILE_HEIGHT,
+                                TILE_WIDTH,
+                                TILE_HEIGHT,
+                            );
+                            overlay(base_image, &ribcage, x - 16, y - (TILE_HEIGHT * 3 / 4) + 6);
+                            overlay(base_image, &skull, x + 16, y - (TILE_HEIGHT * 3 / 4) + 6);
                         }
                     }
                     PlacedTile::BushBlock => {
