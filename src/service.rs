@@ -14,7 +14,7 @@ use crate::generator::Generator;
 use crate::spelunkicon::Spelunkicon;
 
 const MAX_INPUT: usize = 64;
-static VALID_SIZES: &[&str] = &["4", "6", "8"];
+static VALID_SIZES: &[&str] = &["3", "4", "5", "6", "7", "8"];
 static DEFAULT_SIZE: &str = "6";
 static DEFAULT_MISC: &str = "2";
 static PNG_SUFFIX: &str = ".png";
