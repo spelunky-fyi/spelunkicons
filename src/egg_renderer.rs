@@ -10,7 +10,7 @@ use crate::spelunkicon::Spelunkicon;
 pub struct PrideRenderer {}
 
 impl PrideRenderer {
-    fn render_4_pride(
+    fn render_nonbinary_flag(
         &self,
         base_image: &mut RgbaImage,
         sheets: &Sheets,
@@ -71,7 +71,7 @@ impl PrideRenderer {
         // No Decos
     }
 
-    fn render_6_pride(
+    fn render_pansexual_flag(
         &self,
         base_image: &mut RgbaImage,
         sheets: &Sheets,
@@ -145,7 +145,7 @@ impl PrideRenderer {
         }
     }
 
-    fn render_8_pride(
+    fn render_blm_pride_flag(
         &self,
         base_image: &mut RgbaImage,
         sheets: &Sheets,
@@ -334,6 +334,36 @@ impl PrideRenderer {
                 );
             }
         }
+    }
+
+    fn render_4_pride(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        self.render_nonbinary_flag(base_image, sheets, config, rng);
+    }
+
+    fn render_6_pride(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        self.render_pansexual_flag(base_image, sheets, config, rng);
+    }
+
+    fn render_8_pride(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        self.render_blm_pride_flag(base_image, sheets, config, rng);
     }
 
     pub fn render(
