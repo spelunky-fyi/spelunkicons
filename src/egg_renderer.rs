@@ -387,6 +387,87 @@ impl PrideRenderer {
         }
     }
 
+    fn render_agender_flag(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        _rng: &mut StdRng,
+    ) {
+        let w = config.grid_width as u32;
+
+        // Tiles
+        {
+            let duat_sheet = sheets.sheet_floorstyled_from_biome(&Biome::Duat).unwrap();
+            let duat_top =
+                duat_sheet.view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let duat_bot =
+                duat_sheet.view(1 * TILE_WIDTH, 2 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y_top = 0 * TILE_HEIGHT;
+            let y_bot = 6 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &duat_top, x, y_top);
+                overlay(base_image, &duat_bot, x, y_bot);
+            }
+        }
+
+        {
+            let stone_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::Olmec)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y_top = 1 * TILE_HEIGHT;
+            let y_bot = 5 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &stone_tile, x, y_top);
+                overlay(base_image, &stone_tile, x, y_bot);
+            }
+        }
+
+        {
+            let palace_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y_top = 2 * TILE_HEIGHT;
+            let y_bot = 4 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &palace_tile, x, y_top);
+                overlay(base_image, &palace_tile, x, y_bot);
+            }
+        }
+
+        {
+            let vines = sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap().view(
+                8 * TILE_WIDTH,
+                11 * TILE_HEIGHT,
+                TILE_WIDTH,
+                TILE_HEIGHT,
+            );
+            let y = 3 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &vines, x, y);
+            }
+        }
+
+        // Deco
+        {
+            let jungle = &sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap();
+            let up_deco = jungle.view(11 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let down_deco = jungle.view(11 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 3 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &up_deco, x, y - TILE_HEIGHT / 2);
+                overlay(base_image, &down_deco, x, y + TILE_HEIGHT / 2);
+            }
+        }
+    }
+
     fn render_blm_pride_flag(
         &self,
         base_image: &mut RgbaImage,
@@ -618,6 +699,16 @@ impl PrideRenderer {
         self.render_gay_pride_flag(base_image, sheets, config, rng);
     }
 
+    fn render_7_pride(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        self.render_agender_flag(base_image, sheets, config, rng);
+    }
+
     fn render_8_pride(
         &self,
         base_image: &mut RgbaImage,
@@ -640,6 +731,7 @@ impl PrideRenderer {
             4 => self.render_4_pride(base_image, sheets, config, rng),
             5 => self.render_5_pride(base_image, sheets, config, rng),
             6 => self.render_6_pride(base_image, sheets, config, rng),
+            7 => self.render_7_pride(base_image, sheets, config, rng),
             8 => self.render_8_pride(base_image, sheets, config, rng),
             _ => {}
         }
