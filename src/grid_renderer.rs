@@ -208,6 +208,7 @@ pub struct Sheets {
     floorstyled_temple: DynamicImage,
 
     floormisc: DynamicImage,
+    basecamp_deco: DynamicImage,
 
     items: DynamicImage,
 }
@@ -248,6 +249,7 @@ impl Sheets {
                 .unwrap(),
 
             floormisc: load_from_memory_with_format(pngs::FLOORMISC, Png).unwrap(),
+            basecamp_deco: load_from_memory_with_format(pngs::BASECAMP_DECO, Png).unwrap(),
 
             items: load_from_memory_with_format(pngs::ITEMS, Png).unwrap(),
         }
@@ -290,6 +292,10 @@ impl Sheets {
 
             _ => None,
         }
+    }
+
+    pub fn get_basecamp_deco(&self) -> &DynamicImage {
+        return &self.basecamp_deco;
     }
 }
 

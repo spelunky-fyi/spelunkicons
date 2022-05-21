@@ -1,5 +1,8 @@
-use image::imageops::overlay;
-use image::{GenericImageView, RgbaImage};
+use std::f32::consts::{FRAC_PI_2, TAU};
+
+use image::imageops::{huerotate, overlay};
+use image::{GenericImageView, Rgba, RgbaImage};
+use imageproc::geometric_transformations::{rotate_about_center, Interpolation};
 use rand::prelude::*;
 
 use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
@@ -698,6 +701,106 @@ impl PrideRenderer {
         }
     }
 
+    fn render_intersex_flag(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        let w = config.grid_width as u32;
+        let h = config.grid_height as u32;
+
+        // Tiles
+        {
+            let gold_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                for j in 0..h {
+                    let y = j * TILE_HEIGHT;
+                    overlay(base_image, &gold_tile, x, y);
+                }
+            }
+        }
+
+        // Dragon
+        {
+            let hue_rotate = -140;
+
+            let deco_sheet = &sheets.get_basecamp_deco();
+            let dragon_head = deco_sheet
+                .view(
+                    7 * TILE_WIDTH,
+                    8 * TILE_HEIGHT,
+                    2 * TILE_WIDTH,
+                    2 * TILE_HEIGHT,
+                )
+                .to_image();
+            let dragon_head = huerotate(&dragon_head, hue_rotate);
+            let dragon_body = deco_sheet
+                .view(
+                    7 * TILE_WIDTH,
+                    10 * TILE_HEIGHT,
+                    2 * TILE_WIDTH,
+                    2 * TILE_HEIGHT,
+                )
+                .to_image();
+            let dragon_body = huerotate(&dragon_body, hue_rotate);
+
+            let initial_angle = rng.gen_range(0.0..TAU);
+            let total_angle = TAU * 0.94;
+            let circle_size = (w * TILE_WIDTH) as f32 * 0.3;
+            let x_mid = (w as f32 * 0.5 - 1.0) * TILE_WIDTH as f32;
+            let y_mid = (h as f32 * 0.5 - 1.0) * TILE_HEIGHT as f32;
+
+            let body_segments = 18;
+            let transparent_pixel: Rgba<u8> = Rgba([0, 0, 0, 0]);
+            for i in (0..body_segments - 1).rev() {
+                let angle = initial_angle + i as f32 * total_angle / body_segments as f32;
+                let dragon_body = rotate_about_center(
+                    &dragon_body,
+                    angle,
+                    Interpolation::Bicubic,
+                    transparent_pixel,
+                );
+
+                let angle = angle - FRAC_PI_2;
+                let x_off = angle.cos() * circle_size;
+                let y_off = angle.sin() * circle_size;
+                overlay(
+                    base_image,
+                    &dragon_body,
+                    (x_mid + x_off) as u32,
+                    (y_mid + y_off) as u32,
+                );
+            }
+
+            {
+                let angle =
+                    initial_angle + (body_segments - 1) as f32 * total_angle / body_segments as f32;
+                let dragon_head = rotate_about_center(
+                    &dragon_head,
+                    angle,
+                    Interpolation::Bicubic,
+                    transparent_pixel,
+                );
+
+                let angle = angle - FRAC_PI_2;
+                let x_off = angle.cos() * circle_size;
+                let y_off = angle.sin() * circle_size;
+                overlay(
+                    base_image,
+                    &dragon_head,
+                    (x_mid + x_off) as u32,
+                    (y_mid + y_off) as u32,
+                );
+            }
+        }
+    }
+
     fn render_blm_pride_flag(
         &self,
         base_image: &mut RgbaImage,
@@ -948,7 +1051,11 @@ impl PrideRenderer {
         config: &Spelunkicon,
         rng: &mut StdRng,
     ) {
-        self.render_agender_flag(base_image, sheets, config, rng);
+        if rng.gen_bool(0.5) {
+            self.render_agender_flag(base_image, sheets, config, rng);
+        } else {
+            self.render_intersex_flag(base_image, sheets, config, rng);
+        }
     }
 
     fn render_8_pride(
