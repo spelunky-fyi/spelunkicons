@@ -138,6 +138,85 @@ impl PrideRenderer {
         // No Decos
     }
 
+    fn render_ace_flag(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        let w = config.grid_width as u32;
+
+        // Tiles
+        {
+            let duat_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::Duat)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 0 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &duat_tile, x, y);
+            }
+        }
+
+        {
+            let stone_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::Olmec)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 1 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &stone_tile, x, y);
+            }
+        }
+
+        {
+            let palace_tile = sheets
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 2 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &palace_tile, x, y);
+            }
+        }
+
+        {
+            let eggplant_tile = sheets
+                .sheet_floor_from_biome(&Biome::Eggplant)
+                .unwrap()
+                .view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 3 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &eggplant_tile, x, y);
+            }
+        }
+
+        // Decos
+        {
+            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let up_deco = vec![
+                eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(7 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            ];
+            let y = 3 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(
+                    base_image,
+                    up_deco.choose(rng).unwrap(),
+                    x,
+                    y - TILE_HEIGHT / 2,
+                );
+            }
+        }
+    }
+
     fn render_tra_pride_flag(
         &self,
         base_image: &mut RgbaImage,
@@ -763,7 +842,11 @@ impl PrideRenderer {
         config: &Spelunkicon,
         rng: &mut StdRng,
     ) {
-        self.render_nonbinary_flag(base_image, sheets, config, rng);
+        if rng.gen_bool(0.5) {
+            self.render_nonbinary_flag(base_image, sheets, config, rng);
+        } else {
+            self.render_ace_flag(base_image, sheets, config, rng);
+        }
     }
 
     fn render_5_pride(
