@@ -221,6 +221,93 @@ impl PrideRenderer {
         }
     }
 
+    fn render_bi_pride_flag(
+        &self,
+        base_image: &mut RgbaImage,
+        sheets: &Sheets,
+        config: &Spelunkicon,
+        rng: &mut StdRng,
+    ) {
+        let w = config.grid_width as u32;
+
+        // Tiles
+        {
+            let guts_sheet = sheets.sheet_floorstyled_from_biome(&Biome::Guts).unwrap();
+            let guts_bot =
+                guts_sheet.view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let guts_top =
+                guts_sheet.view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y_top = 0 * TILE_HEIGHT;
+            let y_bot = 1 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &guts_top, x, y_top);
+                overlay(base_image, &guts_bot, x, y_bot);
+            }
+        }
+
+        {
+            let eggplant_tile = sheets
+                .sheet_floor_from_biome(&Biome::Eggplant)
+                .unwrap()
+                .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y = 2 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &eggplant_tile, x, y);
+            }
+        }
+
+        {
+            let babylon_sheet = sheets
+                .sheet_floorstyled_from_biome(&Biome::Babylon)
+                .unwrap();
+            let babylon_bot =
+                babylon_sheet.view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let babylon_top =
+                babylon_sheet.view(1 * TILE_WIDTH, 2 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            let y_top = 3 * TILE_HEIGHT;
+            let y_bot = 4 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(base_image, &babylon_top, x, y_top);
+                overlay(base_image, &babylon_bot, x, y_bot);
+            }
+        }
+
+        // Deco
+        {
+            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let up_deco = vec![
+                eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(7 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            ];
+            let down_deco = vec![
+                eggplant.view(5 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(6 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+                eggplant.view(7 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
+            ];
+            let y_top = 2 * TILE_HEIGHT;
+            let y_bot = 2 * TILE_HEIGHT;
+            for i in 0..w {
+                let x = i * TILE_WIDTH;
+                overlay(
+                    base_image,
+                    up_deco.choose(rng).unwrap(),
+                    x,
+                    y_bot - TILE_HEIGHT / 2,
+                );
+                overlay(
+                    base_image,
+                    down_deco.choose(rng).unwrap(),
+                    x,
+                    y_top + TILE_HEIGHT / 2,
+                );
+            }
+        }
+    }
+
     fn render_gay_pride_flag(
         &self,
         base_image: &mut RgbaImage,
@@ -686,7 +773,11 @@ impl PrideRenderer {
         config: &Spelunkicon,
         rng: &mut StdRng,
     ) {
-        self.render_tra_pride_flag(base_image, sheets, config, rng);
+        if rng.gen_bool(0.5) {
+            self.render_tra_pride_flag(base_image, sheets, config, rng);
+        } else {
+            self.render_bi_pride_flag(base_image, sheets, config, rng);
+        }
     }
 
     fn render_6_pride(
