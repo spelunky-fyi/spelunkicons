@@ -59,7 +59,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let tide_pool = &sheets.sheet_floor_from_biome(&Biome::TidePool).unwrap();
             let up_deco = vec![
@@ -124,7 +124,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let up_deco = vec![
                 sunken_sheet.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -334,7 +334,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let surface = &sheets.sheet_floor_from_biome(&Biome::Surface).unwrap();
             let up_deco = vec![
@@ -421,7 +421,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
             let up_deco = vec![
@@ -463,6 +463,7 @@ impl PrideRenderer {
     ) {
         let w = config.grid_width as u32;
 
+        // Tiles
         {
             let vlad_tile = sheets
                 .sheet_floorstyled_from_biome(&Biome::Vlad)
@@ -539,7 +540,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let cave = &sheets.sheet_floor_from_biome(&Biome::Cave).unwrap();
             let up_deco = vec![
@@ -687,7 +688,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let jungle = &sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap();
             let up_deco = jungle.view(11 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
@@ -911,7 +912,7 @@ impl PrideRenderer {
             }
         }
 
-        // Deco
+        // Decos
         {
             let cave = &sheets.sheet_floor_from_biome(&Biome::Cave).unwrap();
             let up_deco = vec![
