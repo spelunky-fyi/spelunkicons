@@ -6,6 +6,7 @@ use indexmap::IndexMap;
 use rand::prelude::StdRng;
 use rand::prelude::*;
 use rand::SeedableRng;
+use std::time::SystemTime;
 
 use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
 use crate::grid_renderer::Sheets;
@@ -54,12 +55,13 @@ impl Generator {
 
         let image_height = config.grid_height as u32 * TILE_HEIGHT;
         let image_width = config.grid_width as u32 * TILE_WIDTH;
-
         let mut image: RgbaImage = ImageBuffer::new(image_width, image_height);
-        let mut rng = StdRng::seed_from_u64(config.hash as u64);
-        let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
         if config.input == "pride" {
+            let d = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .expect("Duration since UNIX_EPOCH failed");
+            let mut rng = StdRng::seed_from_u64(d.as_secs());
             GenSheet::new(GenKind::Pride, Biome::Cave).generate_image(
                 &mut image,
                 &self.sheets,
@@ -67,6 +69,8 @@ impl Generator {
                 &mut rng,
             );
         } else {
+            let mut rng = StdRng::seed_from_u64(config.hash as u64);
+            let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
             let sheet = &self.sheet_gens[sheet_idx];
             sheet.generate_image(&mut image, &self.sheets, &config, &mut rng);
         };
