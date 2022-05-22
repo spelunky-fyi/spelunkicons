@@ -21,8 +21,8 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    if !&[4, 6, 8].contains(&args.size) {
-        eprintln!("Size must be one of 4, 6, or 8");
+    if args.size < 3 || args.size > 8 {
+        eprintln!("Size must be in [3, 8]");
         exit(1);
     }
 

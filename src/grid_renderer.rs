@@ -208,6 +208,7 @@ pub struct Sheets {
     floorstyled_temple: DynamicImage,
 
     floormisc: DynamicImage,
+    basecamp_deco: DynamicImage,
 
     items: DynamicImage,
 }
@@ -248,12 +249,13 @@ impl Sheets {
                 .unwrap(),
 
             floormisc: load_from_memory_with_format(pngs::FLOORMISC, Png).unwrap(),
+            basecamp_deco: load_from_memory_with_format(pngs::BASECAMP_DECO, Png).unwrap(),
 
             items: load_from_memory_with_format(pngs::ITEMS, Png).unwrap(),
         }
     }
 
-    fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
         match biome {
             Biome::Cave => Some(&self.floor_cave),
             Biome::Jungle | Biome::Beehive => Some(&self.floor_jungle),
@@ -270,7 +272,7 @@ impl Sheets {
         }
     }
 
-    fn sheet_floorstyled_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floorstyled_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
         match biome {
             Biome::Cave => Some(&self.floorstyled_wood),
             Biome::Jungle => Some(&self.floorstyled_stone),
@@ -290,6 +292,10 @@ impl Sheets {
 
             _ => None,
         }
+    }
+
+    pub fn get_basecamp_deco(&self) -> &DynamicImage {
+        return &self.basecamp_deco;
     }
 }
 

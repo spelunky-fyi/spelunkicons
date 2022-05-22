@@ -5,6 +5,7 @@ pub mod pngs {
 }
 
 pub mod constants;
+pub mod egg_renderer;
 pub mod generator;
 pub mod grid_generator;
 pub mod grid_renderer;

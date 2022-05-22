@@ -14,7 +14,7 @@ use crate::generator::Generator;
 use crate::spelunkicon::Spelunkicon;
 
 const MAX_INPUT: usize = 64;
-static VALID_SIZES: &[&str] = &["4", "6", "8"];
+static VALID_SIZES: &[&str] = &["3", "4", "5", "6", "7", "8"];
 static DEFAULT_SIZE: &str = "6";
 static DEFAULT_MISC: &str = "2";
 static PNG_SUFFIX: &str = ".png";
@@ -105,8 +105,10 @@ impl Service<Request<Body>> for IconService {
             }
         };
 
+        let egg = params.get("egg").cloned();
+
         // Generate the PNG
-        let config = Spelunkicon::from_input(&input, size, max_misc);
+        let config = Spelunkicon::from_input(&input, egg, size, max_misc);
         let png = match self.generator.make_png(config) {
             Some(png) => png,
             None => {
