@@ -59,16 +59,19 @@ impl Generator {
         let mut rng = StdRng::seed_from_u64(config.hash as u64);
         let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
-        if config.input == "pride" {
-            GenSheet::new(GenKind::Pride, Biome::Cave).generate_image(
-                &mut image,
-                &self.sheets,
-                &config,
-                &mut rng,
-            );
-        } else {
-            let sheet = &self.sheet_gens[sheet_idx];
-            sheet.generate_image(&mut image, &self.sheets, &config, &mut rng);
+        match config.egg.as_deref() {
+            Option::Some("pride") => {
+                GenSheet::new(GenKind::Pride, Biome::Cave).generate_image(
+                    &mut image,
+                    &self.sheets,
+                    &config,
+                    &mut rng,
+                );
+            }
+            _ => {
+                let sheet = &self.sheet_gens[sheet_idx];
+                sheet.generate_image(&mut image, &self.sheets, &config, &mut rng);
+            }
         };
 
         let image = resize(

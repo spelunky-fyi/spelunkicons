@@ -105,8 +105,10 @@ impl Service<Request<Body>> for IconService {
             }
         };
 
+        let egg = params.get("egg").cloned();
+
         // Generate the PNG
-        let config = Spelunkicon::from_input(&input, size, max_misc);
+        let config = Spelunkicon::from_input(&input, egg, size, max_misc);
         let png = match self.generator.make_png(config) {
             Some(png) => png,
             None => {

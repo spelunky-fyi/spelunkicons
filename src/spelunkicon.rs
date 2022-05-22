@@ -6,12 +6,13 @@ pub struct Spelunkicon {
     pub grid_height: u8,
     pub max_misc: u8,
     pub input: String,
+    pub egg: Option<String>,
     pub hash: u32,
     pub grid: Vec<Vec<bool>>,
 }
 
 impl Spelunkicon {
-    pub fn from_input(input: &str, height: u8, max_misc: u8) -> Self {
+    pub fn from_input(input: &str, egg: Option<String>, height: u8, max_misc: u8) -> Self {
         let grid_width = height;
         let grid_height = height;
 
@@ -45,6 +46,7 @@ impl Spelunkicon {
             grid_width,
             max_misc,
             input,
+            egg,
             hash,
             grid,
         }
