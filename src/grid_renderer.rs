@@ -483,12 +483,33 @@ impl GridRenderer {
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        overlay(
-                            base_image,
-                            &tile_image,
-                            x - TILE_WIDTH / 2,
-                            y - TILE_HEIGHT + 18,
-                        );
+                        if *biome == Biome::Volcana && !placed_egg && rng.gen_bool(0.3) {
+                            let precious_image = &load_images(CHAR_PRECIOUS, CLASSIC_CHAR_PRECIOUS)
+                                [if self.classic_mode { 1 } else { 0 }];
+
+                            overlay(
+                                base_image,
+                                precious_image,
+                                x - TILE_WIDTH + 8,
+                                y - TILE_HEIGHT + 8,
+                            );
+
+                            overlay(
+                                base_image,
+                                &tile_image,
+                                x - TILE_WIDTH / 2,
+                                y - TILE_HEIGHT + 13,
+                            );
+
+                            placed_egg = true;
+                        } else {
+                            overlay(
+                                base_image,
+                                &tile_image,
+                                x - TILE_WIDTH / 2,
+                                y - TILE_HEIGHT + 18,
+                            );
+                        }
                     }
                     PlacedTile::EggplantAltarLeft => {
                         place_tile(biome_sheet, 11, 2);
@@ -572,17 +593,10 @@ impl GridRenderer {
                     }
                     PlacedTile::IceBlock => {
                         if !placed_egg && rng.gen_bool(0.2) {
-                            let beg_image = load_from_memory_with_format(
-                                if self.classic_mode {
-                                    CLASSIC_CHAR_BEG
-                                } else {
-                                    CHAR_BEG
-                                },
-                                Png,
-                            )
-                            .unwrap();
+                            let beg_image = &load_images(CHAR_BEG, CLASSIC_CHAR_BEG)
+                                [if self.classic_mode { 1 } else { 0 }];
 
-                            overlay(base_image, &beg_image, x, y);
+                            overlay(base_image, beg_image, x, y);
 
                             placed_egg = true;
                         }

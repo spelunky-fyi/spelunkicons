@@ -6,6 +6,7 @@ use crate::grid_generator::*;
 use crate::grid_renderer::{GridRenderer, Sheets};
 use crate::spelunkicon::Spelunkicon;
 
+#[derive(PartialEq)]
 pub enum Biome {
     Cave,
     Jungle,
