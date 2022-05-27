@@ -10,9 +10,15 @@ use crate::grid_renderer::Sheets;
 use crate::sheets::Biome;
 use crate::spelunkicon::Spelunkicon;
 
-pub struct PrideRenderer {}
+pub struct PrideRenderer {
+    classic_mode: bool,
+}
 
 impl PrideRenderer {
+    pub fn new(classic_mode: bool) -> Self {
+        return Self { classic_mode };
+    }
+
     fn render_pansexual_flag(
         &self,
         base_image: &mut RgbaImage,
@@ -25,7 +31,7 @@ impl PrideRenderer {
         // Tiles
         {
             let guts_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Guts)
+                .sheet_floorstyled_from_biome(&Biome::Guts, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 0 * TILE_HEIGHT;
@@ -37,7 +43,7 @@ impl PrideRenderer {
 
         {
             let gold_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
@@ -49,7 +55,7 @@ impl PrideRenderer {
 
         {
             let tidepool_tile = sheets
-                .sheet_floor_from_biome(&Biome::TidePool)
+                .sheet_floor_from_biome(&Biome::TidePool, self.classic_mode)
                 .unwrap()
                 .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -61,7 +67,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let tide_pool = &sheets.sheet_floor_from_biome(&Biome::TidePool).unwrap();
+            let tide_pool = &sheets
+                .sheet_floor_from_biome(&Biome::TidePool, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 tide_pool.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 tide_pool.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -90,7 +98,9 @@ impl PrideRenderer {
         let w = config.grid_width as u32;
 
         // Tiles
-        let sunken_sheet = sheets.sheet_floor_from_biome(&Biome::Sunken).unwrap();
+        let sunken_sheet = sheets
+            .sheet_floor_from_biome(&Biome::Sunken, self.classic_mode)
+            .unwrap();
 
         {
             let pipes_tile =
@@ -104,7 +114,7 @@ impl PrideRenderer {
 
         {
             let palace_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
@@ -156,7 +166,7 @@ impl PrideRenderer {
         // Tiles
         {
             let gold_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 0 * TILE_HEIGHT;
@@ -168,7 +178,7 @@ impl PrideRenderer {
 
         {
             let palace_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
@@ -180,7 +190,7 @@ impl PrideRenderer {
 
         {
             let babylon_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Babylon)
+                .sheet_floorstyled_from_biome(&Biome::Babylon, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -192,7 +202,7 @@ impl PrideRenderer {
 
         {
             let duat_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Duat)
+                .sheet_floorstyled_from_biome(&Biome::Duat, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 2 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
@@ -217,7 +227,7 @@ impl PrideRenderer {
         // Tiles
         {
             let duat_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Duat)
+                .sheet_floorstyled_from_biome(&Biome::Duat, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 0 * TILE_HEIGHT;
@@ -229,7 +239,7 @@ impl PrideRenderer {
 
         {
             let stone_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Olmec)
+                .sheet_floorstyled_from_biome(&Biome::Olmec, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
@@ -241,7 +251,7 @@ impl PrideRenderer {
 
         {
             let palace_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -253,7 +263,7 @@ impl PrideRenderer {
 
         {
             let eggplant_tile = sheets
-                .sheet_floor_from_biome(&Biome::Eggplant)
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
@@ -265,7 +275,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let eggplant = &sheets
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -296,7 +308,7 @@ impl PrideRenderer {
         // Tiles
         {
             let surface_tile = sheets
-                .sheet_floor_from_biome(&Biome::Surface)
+                .sheet_floor_from_biome(&Biome::Surface, self.classic_mode)
                 .unwrap()
                 .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y_top = 0 * TILE_HEIGHT;
@@ -310,7 +322,7 @@ impl PrideRenderer {
 
         {
             let guts_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Guts)
+                .sheet_floorstyled_from_biome(&Biome::Guts, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y_top = 1 * TILE_HEIGHT;
@@ -324,7 +336,7 @@ impl PrideRenderer {
 
         {
             let palace_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -336,7 +348,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let surface = &sheets.sheet_floor_from_biome(&Biome::Surface).unwrap();
+            let surface = &sheets
+                .sheet_floor_from_biome(&Biome::Surface, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 surface.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 surface.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -378,7 +392,9 @@ impl PrideRenderer {
 
         // Tiles
         {
-            let guts_sheet = sheets.sheet_floorstyled_from_biome(&Biome::Guts).unwrap();
+            let guts_sheet = sheets
+                .sheet_floorstyled_from_biome(&Biome::Guts, self.classic_mode)
+                .unwrap();
             let guts_bot =
                 guts_sheet.view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let guts_top =
@@ -394,7 +410,7 @@ impl PrideRenderer {
 
         {
             let eggplant_tile = sheets
-                .sheet_floor_from_biome(&Biome::Eggplant)
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
                 .unwrap()
                 .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -406,7 +422,7 @@ impl PrideRenderer {
 
         {
             let babylon_sheet = sheets
-                .sheet_floorstyled_from_biome(&Biome::Babylon)
+                .sheet_floorstyled_from_biome(&Biome::Babylon, self.classic_mode)
                 .unwrap();
             let babylon_bot =
                 babylon_sheet.view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
@@ -423,7 +439,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let eggplant = &sheets
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -466,7 +484,7 @@ impl PrideRenderer {
         // Tiles
         {
             let vlad_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Vlad)
+                .sheet_floorstyled_from_biome(&Biome::Vlad, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 0 * TILE_HEIGHT;
@@ -477,12 +495,10 @@ impl PrideRenderer {
         }
 
         {
-            let cave_tile = sheets.sheet_floor_from_biome(&Biome::Cave).unwrap().view(
-                0 * TILE_WIDTH,
-                0 * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-            );
+            let cave_tile = sheets
+                .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                .unwrap()
+                .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
             for i in 0..w {
                 let x = i * TILE_WIDTH;
@@ -492,7 +508,7 @@ impl PrideRenderer {
 
         {
             let gold_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -503,12 +519,10 @@ impl PrideRenderer {
         }
 
         {
-            let jungle_tile = sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap().view(
-                0 * TILE_WIDTH,
-                0 * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-            );
+            let jungle_tile = sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap()
+                .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
             for i in 0..w {
                 let x = i * TILE_WIDTH;
@@ -518,7 +532,7 @@ impl PrideRenderer {
 
         {
             let pagoda_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::TidePool)
+                .sheet_floorstyled_from_biome(&Biome::TidePool, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 4 * TILE_HEIGHT;
@@ -530,7 +544,7 @@ impl PrideRenderer {
 
         {
             let eggplant_tile = sheets
-                .sheet_floor_from_biome(&Biome::Eggplant)
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
                 .unwrap()
                 .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 5 * TILE_HEIGHT;
@@ -542,7 +556,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let cave = &sheets.sheet_floor_from_biome(&Biome::Cave).unwrap();
+            let cave = &sheets
+                .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 cave.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 cave.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -572,7 +588,9 @@ impl PrideRenderer {
         }
 
         {
-            let jungle = &sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap();
+            let jungle = &sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 jungle.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 jungle.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -602,7 +620,9 @@ impl PrideRenderer {
         }
 
         {
-            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let eggplant = &sheets
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -632,7 +652,9 @@ impl PrideRenderer {
 
         // Tiles
         {
-            let duat_sheet = sheets.sheet_floorstyled_from_biome(&Biome::Duat).unwrap();
+            let duat_sheet = sheets
+                .sheet_floorstyled_from_biome(&Biome::Duat, self.classic_mode)
+                .unwrap();
             let duat_top =
                 duat_sheet.view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let duat_bot =
@@ -648,7 +670,7 @@ impl PrideRenderer {
 
         {
             let stone_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Olmec)
+                .sheet_floorstyled_from_biome(&Biome::Olmec, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y_top = 1 * TILE_HEIGHT;
@@ -662,7 +684,7 @@ impl PrideRenderer {
 
         {
             let palace_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure)
+                .sheet_floorstyled_from_biome(&Biome::PalaceOfPleasure, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y_top = 2 * TILE_HEIGHT;
@@ -675,12 +697,10 @@ impl PrideRenderer {
         }
 
         {
-            let vines = sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap().view(
-                8 * TILE_WIDTH,
-                11 * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-            );
+            let vines = sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap()
+                .view(8 * TILE_WIDTH, 11 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
             for i in 0..w {
                 let x = i * TILE_WIDTH;
@@ -690,7 +710,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let jungle = &sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap();
+            let jungle = &sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap();
             let up_deco = jungle.view(11 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let down_deco = jungle.view(11 * TILE_WIDTH, 7 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
@@ -715,7 +737,7 @@ impl PrideRenderer {
         // Tiles
         {
             let gold_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 3 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             for i in 0..w {
@@ -731,7 +753,7 @@ impl PrideRenderer {
         {
             let hue_rotate = -140;
 
-            let deco_sheet = &sheets.get_basecamp_deco();
+            let deco_sheet = &sheets.get_basecamp_deco(self.classic_mode);
             let dragon_head = deco_sheet
                 .view(
                     7 * TILE_WIDTH,
@@ -814,7 +836,7 @@ impl PrideRenderer {
         // Tiles
         {
             let duat_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Duat)
+                .sheet_floorstyled_from_biome(&Biome::Duat, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 4 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 0 * TILE_HEIGHT;
@@ -826,7 +848,7 @@ impl PrideRenderer {
 
         {
             let wood_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Cave)
+                .sheet_floorstyled_from_biome(&Biome::Cave, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 1 * TILE_HEIGHT;
@@ -838,7 +860,7 @@ impl PrideRenderer {
 
         {
             let vlad_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::Vlad)
+                .sheet_floorstyled_from_biome(&Biome::Vlad, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 2 * TILE_HEIGHT;
@@ -849,12 +871,10 @@ impl PrideRenderer {
         }
 
         {
-            let cave_tile = sheets.sheet_floor_from_biome(&Biome::Cave).unwrap().view(
-                0 * TILE_WIDTH,
-                0 * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-            );
+            let cave_tile = sheets
+                .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                .unwrap()
+                .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 3 * TILE_HEIGHT;
             for i in 0..w {
                 let x = i * TILE_WIDTH;
@@ -864,7 +884,7 @@ impl PrideRenderer {
 
         {
             let gold_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::CityOfGold)
+                .sheet_floorstyled_from_biome(&Biome::CityOfGold, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 4 * TILE_HEIGHT;
@@ -875,12 +895,10 @@ impl PrideRenderer {
         }
 
         {
-            let jungle_tile = sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap().view(
-                0 * TILE_WIDTH,
-                0 * TILE_HEIGHT,
-                TILE_WIDTH,
-                TILE_HEIGHT,
-            );
+            let jungle_tile = sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap()
+                .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 5 * TILE_HEIGHT;
             for i in 0..w {
                 let x = i * TILE_WIDTH;
@@ -890,7 +908,7 @@ impl PrideRenderer {
 
         {
             let pagoda_tile = sheets
-                .sheet_floorstyled_from_biome(&Biome::TidePool)
+                .sheet_floorstyled_from_biome(&Biome::TidePool, self.classic_mode)
                 .unwrap()
                 .view(1 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 6 * TILE_HEIGHT;
@@ -902,7 +920,7 @@ impl PrideRenderer {
 
         {
             let eggplant_tile = sheets
-                .sheet_floor_from_biome(&Biome::Eggplant)
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
                 .unwrap()
                 .view(0 * TILE_WIDTH, 0 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             let y = 7 * TILE_HEIGHT;
@@ -914,7 +932,9 @@ impl PrideRenderer {
 
         // Decos
         {
-            let cave = &sheets.sheet_floor_from_biome(&Biome::Cave).unwrap();
+            let cave = &sheets
+                .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 cave.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 cave.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -944,7 +964,9 @@ impl PrideRenderer {
         }
 
         {
-            let jungle = &sheets.sheet_floor_from_biome(&Biome::Jungle).unwrap();
+            let jungle = &sheets
+                .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 jungle.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 jungle.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -974,7 +996,9 @@ impl PrideRenderer {
         }
 
         {
-            let eggplant = &sheets.sheet_floor_from_biome(&Biome::Eggplant).unwrap();
+            let eggplant = &sheets
+                .sheet_floor_from_biome(&Biome::Eggplant, self.classic_mode)
+                .unwrap();
             let up_deco = vec![
                 eggplant.view(5 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
                 eggplant.view(6 * TILE_WIDTH, 6 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),

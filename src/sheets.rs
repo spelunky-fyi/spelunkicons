@@ -56,6 +56,7 @@ impl GenSheet {
         base_image: &mut RgbaImage,
         sheets: &Sheets,
         config: &Spelunkicon,
+        classic_mode: bool,
         rng: &mut StdRng,
     ) {
         match self {
@@ -64,7 +65,7 @@ impl GenSheet {
                 let floor = generator.place_floor_tiles(biome, config, rng);
                 let floor = generator.place_floormisc_tiles(biome, config, rng, floor);
 
-                let renderer = GridRenderer {};
+                let renderer = GridRenderer::new(classic_mode);
                 renderer.render_floor_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floormisc_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floor_decorations(base_image, sheets, biome, config, rng, &floor);
@@ -75,7 +76,7 @@ impl GenSheet {
                 let floor = generator.place_floorstyled_tiles(biome, config, rng, None);
                 let floor = generator.place_floormisc_tiles(biome, config, rng, floor);
 
-                let renderer = GridRenderer {};
+                let renderer = GridRenderer::new(classic_mode);
                 renderer.render_floorstyled_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floormisc_tiles(base_image, sheets, biome, config, rng, &floor);
             }
@@ -85,7 +86,7 @@ impl GenSheet {
                 let floor = generator.place_floorstyled_tiles(biome, config, rng, Some(floor));
                 let floor = generator.place_floormisc_tiles(biome, config, rng, floor);
 
-                let renderer = GridRenderer {};
+                let renderer = GridRenderer::new(classic_mode);
                 renderer.render_floor_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floorstyled_tiles(base_image, sheets, biome, config, rng, &floor);
                 renderer.render_floormisc_tiles(base_image, sheets, biome, config, rng, &floor);
@@ -93,7 +94,7 @@ impl GenSheet {
                 renderer.render_floor_embeds(base_image, sheets, config, rng, &floor);
             }
             GenSheet::Pride() => {
-                let renderer = PrideRenderer {};
+                let renderer = PrideRenderer::new(classic_mode);
                 renderer.render(base_image, sheets, config, rng);
             }
         }

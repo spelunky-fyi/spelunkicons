@@ -35,7 +35,16 @@ static PNGS: &'static [(&str, &str)] = &[
 ];
 
 fn main() {
-    let textures_path = fs::canonicalize(PathBuf::from("target/Textures")).unwrap();
+    let texture_roots = [
+        (
+            "",
+            fs::canonicalize(PathBuf::from("target/Textures")).unwrap(),
+        ),
+        (
+            "CLASSIC_",
+            fs::canonicalize(PathBuf::from("target/ClassicTextures")).unwrap(),
+        ),
+    ];
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("pngs.rs");
@@ -43,26 +52,29 @@ fn main() {
     let mut out_file = File::create(&dest_path).unwrap();
 
     for (name, path) in PNGS {
-        let path = textures_path.join(path);
-        let metadata = fs::metadata(&path).unwrap_or_else(|err| {
-            panic!(
-                "Error loading metadata of file {}: {:?}",
-                path.to_string_lossy(),
-                err
-            )
-        });
-
-        out_file
-            .write(
-                format!(
-                    "pub static {}: &'static [u8; {}] = include_bytes!({:?});\n",
-                    name,
-                    metadata.len(),
-                    &path
+        for (prefix, root) in &texture_roots {
+            let path = root.join(path);
+            let metadata = fs::metadata(&path).unwrap_or_else(|err| {
+                panic!(
+                    "Error loading metadata of file {}: {:?}",
+                    path.to_string_lossy(),
+                    err
                 )
-                .as_bytes(),
-            )
-            .unwrap();
+            });
+
+            out_file
+                .write(
+                    format!(
+                        "pub static {}{}: &'static [u8; {}] = include_bytes!({:?});\n",
+                        prefix,
+                        name,
+                        metadata.len(),
+                        &path
+                    )
+                    .as_bytes(),
+                )
+                .unwrap();
+        }
     }
     println!("cargo:rerun-if-changed=build.rs");
 }
