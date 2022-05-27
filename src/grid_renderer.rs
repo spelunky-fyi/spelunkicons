@@ -1015,7 +1015,7 @@ impl GridRenderer {
                         overlay(base_image, crust_gold.choose(rng).unwrap(), x, y);
                     } else if rng.gen::<u32>() % 24 == 0 {
                         overlay(base_image, crust_jewels.choose(rng).unwrap(), x, y);
-                    } else if rng.gen::<u32>() % 62000 == 0 {
+                    } else if rng.gen::<u32>() % 5000 == 0 {
                         overlay(base_image, &crust_jetpack, x, y);
                     }
                 }
