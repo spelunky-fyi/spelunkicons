@@ -512,7 +512,7 @@ impl GridRenderer {
                         }
                     }
                     PlacedTile::EggplantAltarLeft => {
-                        place_tile(biome_sheet, 11, 2);
+                        place_tile(biome_sheet, 10, 2);
                     }
                     PlacedTile::EggplantAltarRight => {
                         place_tile(biome_sheet, 11, 2);
