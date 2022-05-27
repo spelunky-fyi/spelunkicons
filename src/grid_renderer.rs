@@ -6,7 +6,7 @@ use rand::prelude::*;
 
 use crate::constants::{TILE_HEIGHT, TILE_WIDTH};
 use crate::grid_generator::*;
-use crate::pngs;
+use crate::pngs::*;
 use crate::sheets::Biome;
 use crate::spelunkicon::Spelunkicon;
 
@@ -182,126 +182,151 @@ fn get_floor_styled_texture_coords(neighbour_mask: u8) -> (u32, u32) {
 }
 
 pub struct Sheets {
-    floor_cave: DynamicImage,
-    floor_jungle: DynamicImage,
-    floor_babylon: DynamicImage,
-    floor_eggplant: DynamicImage,
-    floor_ice: DynamicImage,
-    floor_sunken: DynamicImage,
-    floor_surface: DynamicImage,
-    floor_temple: DynamicImage,
-    floor_tidepool: DynamicImage,
-    floor_volcano: DynamicImage,
+    floor_cave: [DynamicImage; 2],
+    floor_jungle: [DynamicImage; 2],
+    floor_babylon: [DynamicImage; 2],
+    floor_eggplant: [DynamicImage; 2],
+    floor_ice: [DynamicImage; 2],
+    floor_sunken: [DynamicImage; 2],
+    floor_surface: [DynamicImage; 2],
+    floor_temple: [DynamicImage; 2],
+    floor_tidepool: [DynamicImage; 2],
+    floor_volcano: [DynamicImage; 2],
 
-    floorstyled_vlad: DynamicImage,
-    floorstyled_wood: DynamicImage,
-    floorstyled_babylon: DynamicImage,
-    floorstyled_beehive: DynamicImage,
-    floorstyled_duat: DynamicImage,
-    floorstyled_gold: DynamicImage,
-    floorstyled_guts: DynamicImage,
-    floorstyled_mothership: DynamicImage,
-    floorstyled_pagoda: DynamicImage,
-    floorstyled_palace: DynamicImage,
-    floorstyled_stone: DynamicImage,
-    floorstyled_sunken: DynamicImage,
-    floorstyled_temple: DynamicImage,
+    floorstyled_vlad: [DynamicImage; 2],
+    floorstyled_wood: [DynamicImage; 2],
+    floorstyled_babylon: [DynamicImage; 2],
+    floorstyled_beehive: [DynamicImage; 2],
+    floorstyled_duat: [DynamicImage; 2],
+    floorstyled_gold: [DynamicImage; 2],
+    floorstyled_guts: [DynamicImage; 2],
+    floorstyled_mothership: [DynamicImage; 2],
+    floorstyled_pagoda: [DynamicImage; 2],
+    floorstyled_palace: [DynamicImage; 2],
+    floorstyled_stone: [DynamicImage; 2],
+    floorstyled_sunken: [DynamicImage; 2],
+    floorstyled_temple: [DynamicImage; 2],
 
-    floormisc: DynamicImage,
-    basecamp_deco: DynamicImage,
+    floormisc: [DynamicImage; 2],
+    basecamp_deco: [DynamicImage; 2],
 
-    items: DynamicImage,
+    items: [DynamicImage; 2],
+}
+
+fn load_images(spel2_data: &[u8], classic_data: &[u8]) -> [DynamicImage; 2] {
+    [
+        load_from_memory_with_format(spel2_data, Png).unwrap(),
+        load_from_memory_with_format(classic_data, Png).unwrap(),
+    ]
 }
 
 impl Sheets {
     pub fn new() -> Self {
         Self {
-            floor_cave: load_from_memory_with_format(pngs::FLOOR_CAVE, Png).unwrap(),
-            floor_jungle: load_from_memory_with_format(pngs::FLOOR_JUNGLE, Png).unwrap(),
-            floor_babylon: load_from_memory_with_format(pngs::FLOOR_BABYLON, Png).unwrap(),
-            floor_eggplant: load_from_memory_with_format(pngs::FLOOR_EGGPLANT, Png).unwrap(),
-            floor_ice: load_from_memory_with_format(pngs::FLOOR_ICE, Png).unwrap(),
-            floor_sunken: load_from_memory_with_format(pngs::FLOOR_SUNKEN, Png).unwrap(),
-            floor_surface: load_from_memory_with_format(pngs::FLOOR_SURFACE, Png).unwrap(),
-            floor_temple: load_from_memory_with_format(pngs::FLOOR_TEMPLE, Png).unwrap(),
-            floor_tidepool: load_from_memory_with_format(pngs::FLOOR_TIDEPOOL, Png).unwrap(),
-            floor_volcano: load_from_memory_with_format(pngs::FLOOR_VOLCANO, Png).unwrap(),
+            floor_cave: load_images(FLOOR_CAVE, CLASSIC_FLOOR_CAVE),
+            floor_jungle: load_images(FLOOR_JUNGLE, CLASSIC_FLOOR_JUNGLE),
+            floor_babylon: load_images(FLOOR_BABYLON, CLASSIC_FLOOR_BABYLON),
+            floor_eggplant: load_images(FLOOR_EGGPLANT, CLASSIC_FLOOR_EGGPLANT),
+            floor_ice: load_images(FLOOR_ICE, CLASSIC_FLOOR_ICE),
+            floor_sunken: load_images(FLOOR_SUNKEN, CLASSIC_FLOOR_SUNKEN),
+            floor_surface: load_images(FLOOR_SURFACE, CLASSIC_FLOOR_SURFACE),
+            floor_temple: load_images(FLOOR_TEMPLE, CLASSIC_FLOOR_TEMPLE),
+            floor_tidepool: load_images(FLOOR_TIDEPOOL, CLASSIC_FLOOR_TIDEPOOL),
+            floor_volcano: load_images(FLOOR_VOLCANO, CLASSIC_FLOOR_VOLCANO),
 
-            floorstyled_vlad: load_from_memory_with_format(pngs::FLOORSTYLED_VLAD, Png).unwrap(),
-            floorstyled_wood: load_from_memory_with_format(pngs::FLOORSTYLED_WOOD, Png).unwrap(),
-            floorstyled_babylon: load_from_memory_with_format(pngs::FLOORSTYLED_BABYLON, Png)
-                .unwrap(),
-            floorstyled_beehive: load_from_memory_with_format(pngs::FLOORSTYLED_BEEHIVE, Png)
-                .unwrap(),
-            floorstyled_duat: load_from_memory_with_format(pngs::FLOORSTYLED_DUAT, Png).unwrap(),
-            floorstyled_gold: load_from_memory_with_format(pngs::FLOORSTYLED_GOLD, Png).unwrap(),
-            floorstyled_guts: load_from_memory_with_format(pngs::FLOORSTYLED_GUTS, Png).unwrap(),
-            floorstyled_mothership: load_from_memory_with_format(pngs::FLOORSTYLED_MOTHERSHIP, Png)
-                .unwrap(),
-            floorstyled_pagoda: load_from_memory_with_format(pngs::FLOORSTYLED_PAGODA, Png)
-                .unwrap(),
-            floorstyled_palace: load_from_memory_with_format(pngs::FLOORSTYLED_PALACE, Png)
-                .unwrap(),
-            floorstyled_stone: load_from_memory_with_format(pngs::FLOORSTYLED_STONE, Png).unwrap(),
-            floorstyled_sunken: load_from_memory_with_format(pngs::FLOORSTYLED_SUNKEN, Png)
-                .unwrap(),
-            floorstyled_temple: load_from_memory_with_format(pngs::FLOORSTYLED_TEMPLE, Png)
-                .unwrap(),
+            floorstyled_vlad: load_images(FLOORSTYLED_VLAD, CLASSIC_FLOORSTYLED_VLAD),
+            floorstyled_wood: load_images(FLOORSTYLED_WOOD, CLASSIC_FLOORSTYLED_WOOD),
+            floorstyled_babylon: load_images(FLOORSTYLED_BABYLON, CLASSIC_FLOORSTYLED_BABYLON),
+            floorstyled_beehive: load_images(FLOORSTYLED_BEEHIVE, CLASSIC_FLOORSTYLED_BEEHIVE),
+            floorstyled_duat: load_images(FLOORSTYLED_DUAT, CLASSIC_FLOORSTYLED_DUAT),
+            floorstyled_gold: load_images(FLOORSTYLED_GOLD, CLASSIC_FLOORSTYLED_GOLD),
+            floorstyled_guts: load_images(FLOORSTYLED_GUTS, CLASSIC_FLOORSTYLED_GUTS),
+            floorstyled_mothership: load_images(
+                FLOORSTYLED_MOTHERSHIP,
+                CLASSIC_FLOORSTYLED_MOTHERSHIP,
+            ),
+            floorstyled_pagoda: load_images(FLOORSTYLED_PAGODA, CLASSIC_FLOORSTYLED_PAGODA),
+            floorstyled_palace: load_images(FLOORSTYLED_PALACE, CLASSIC_FLOORSTYLED_PALACE),
+            floorstyled_stone: load_images(FLOORSTYLED_STONE, CLASSIC_FLOORSTYLED_STONE),
+            floorstyled_sunken: load_images(FLOORSTYLED_SUNKEN, CLASSIC_FLOORSTYLED_SUNKEN),
+            floorstyled_temple: load_images(FLOORSTYLED_TEMPLE, CLASSIC_FLOORSTYLED_TEMPLE),
+            floormisc: load_images(FLOORMISC, CLASSIC_FLOORMISC),
+            basecamp_deco: load_images(BASECAMP_DECO, CLASSIC_BASECAMP_DECO),
 
-            floormisc: load_from_memory_with_format(pngs::FLOORMISC, Png).unwrap(),
-            basecamp_deco: load_from_memory_with_format(pngs::BASECAMP_DECO, Png).unwrap(),
-
-            items: load_from_memory_with_format(pngs::ITEMS, Png).unwrap(),
+            items: load_images(ITEMS, CLASSIC_ITEMS),
         }
     }
 
-    pub fn sheet_floor_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floor_from_biome(&self, biome: &Biome, classic: bool) -> Option<&DynamicImage> {
+        let idx = if classic { 1 } else { 0 };
         match biome {
-            Biome::Cave => Some(&self.floor_cave),
-            Biome::Jungle | Biome::Beehive => Some(&self.floor_jungle),
-            Biome::Babylon => Some(&self.floor_babylon),
-            Biome::Eggplant => Some(&self.floor_eggplant),
-            Biome::Ice => Some(&self.floor_ice),
-            Biome::Sunken => Some(&self.floor_sunken),
-            Biome::Surface => Some(&self.floor_surface),
-            Biome::Temple => Some(&self.floor_temple),
-            Biome::TidePool => Some(&self.floor_tidepool),
-            Biome::Volcana => Some(&self.floor_volcano),
+            Biome::Cave => Some(&self.floor_cave[idx]),
+            Biome::Jungle | Biome::Beehive => Some(&self.floor_jungle[idx]),
+            Biome::Babylon => Some(&self.floor_babylon[idx]),
+            Biome::Eggplant => Some(&self.floor_eggplant[idx]),
+            Biome::Ice => Some(&self.floor_ice[idx]),
+            Biome::Sunken => Some(&self.floor_sunken[idx]),
+            Biome::Surface => Some(&self.floor_surface[idx]),
+            Biome::Temple => Some(&self.floor_temple[idx]),
+            Biome::TidePool => Some(&self.floor_tidepool[idx]),
+            Biome::Volcana => Some(&self.floor_volcano[idx]),
 
             _ => None,
         }
     }
 
-    pub fn sheet_floorstyled_from_biome(&self, biome: &Biome) -> Option<&DynamicImage> {
+    pub fn sheet_floorstyled_from_biome(
+        &self,
+        biome: &Biome,
+        classic: bool,
+    ) -> Option<&DynamicImage> {
+        let idx = if classic { 1 } else { 0 };
         match biome {
-            Biome::Cave => Some(&self.floorstyled_wood),
-            Biome::Jungle => Some(&self.floorstyled_stone),
-            Biome::Babylon => Some(&self.floorstyled_babylon),
-            Biome::Sunken => Some(&self.floorstyled_sunken),
-            Biome::Temple => Some(&self.floorstyled_temple),
-            Biome::TidePool => Some(&self.floorstyled_pagoda),
+            Biome::Cave => Some(&self.floorstyled_wood[idx]),
+            Biome::Jungle => Some(&self.floorstyled_stone[idx]),
+            Biome::Babylon => Some(&self.floorstyled_babylon[idx]),
+            Biome::Sunken => Some(&self.floorstyled_sunken[idx]),
+            Biome::Temple => Some(&self.floorstyled_temple[idx]),
+            Biome::TidePool => Some(&self.floorstyled_pagoda[idx]),
 
-            Biome::Beehive => Some(&self.floorstyled_beehive),
-            Biome::Vlad => Some(&self.floorstyled_vlad),
-            Biome::CityOfGold => Some(&self.floorstyled_gold),
-            Biome::Duat => Some(&self.floorstyled_duat),
-            Biome::Mothership => Some(&self.floorstyled_mothership),
-            Biome::PalaceOfPleasure => Some(&self.floorstyled_palace),
-            Biome::Guts => Some(&self.floorstyled_guts),
-            Biome::Olmec => Some(&self.floorstyled_stone),
+            Biome::Beehive => Some(&self.floorstyled_beehive[idx]),
+            Biome::Vlad => Some(&self.floorstyled_vlad[idx]),
+            Biome::CityOfGold => Some(&self.floorstyled_gold[idx]),
+            Biome::Duat => Some(&self.floorstyled_duat[idx]),
+            Biome::Mothership => Some(&self.floorstyled_mothership[idx]),
+            Biome::PalaceOfPleasure => Some(&self.floorstyled_palace[idx]),
+            Biome::Guts => Some(&self.floorstyled_guts[idx]),
+            Biome::Olmec => Some(&self.floorstyled_stone[idx]),
 
             _ => None,
         }
     }
 
-    pub fn get_basecamp_deco(&self) -> &DynamicImage {
-        return &self.basecamp_deco;
+    pub fn get_floormisc(&self, classic: bool) -> &DynamicImage {
+        let idx = if classic { 1 } else { 0 };
+        return &self.floormisc[idx];
+    }
+
+    pub fn get_basecamp_deco(&self, classic: bool) -> &DynamicImage {
+        let idx = if classic { 1 } else { 0 };
+        return &self.basecamp_deco[idx];
+    }
+
+    pub fn get_items(&self, classic: bool) -> &DynamicImage {
+        let idx = if classic { 1 } else { 0 };
+        return &self.items[idx];
     }
 }
 
-pub struct GridRenderer {}
+pub struct GridRenderer {
+    classic_mode: bool,
+}
 
 impl GridRenderer {
+    pub fn new(classic_mode: bool) -> Self {
+        return Self { classic_mode };
+    }
+
     fn base_tiles<'a>(&self, image: &'a DynamicImage) -> Vec<SubImage<&'a DynamicImage>> {
         return vec![
             image.view(0, 0, TILE_WIDTH, TILE_HEIGHT),
@@ -320,7 +345,9 @@ impl GridRenderer {
         rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
-        let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
+        let sheet_image = sheets
+            .sheet_floor_from_biome(biome, self.classic_mode)
+            .unwrap();
 
         let tile_images = self.base_tiles(sheet_image);
 
@@ -346,7 +373,9 @@ impl GridRenderer {
         _rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
-        let sheet_image = sheets.sheet_floorstyled_from_biome(biome).unwrap();
+        let sheet_image = sheets
+            .sheet_floorstyled_from_biome(biome, self.classic_mode)
+            .unwrap();
 
         for (row_idx, row) in grid.iter().enumerate() {
             for (col_idx, tile) in row.iter().enumerate() {
@@ -402,13 +431,23 @@ impl GridRenderer {
         rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
-        let floormisc = &sheets.floormisc;
+        let floormisc = sheets.get_floormisc(self.classic_mode);
         let biome_sheet = sheets
-            .sheet_floor_from_biome(biome)
-            .unwrap_or(&sheets.floor_cave);
+            .sheet_floor_from_biome(biome, self.classic_mode)
+            .unwrap_or(
+                sheets
+                    .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                    .unwrap(),
+            );
         let floorstyled_biome_sheet = sheets
-            .sheet_floorstyled_from_biome(biome)
-            .unwrap_or(&sheets.floorstyled_stone);
+            .sheet_floorstyled_from_biome(biome, self.classic_mode)
+            .unwrap_or(
+                sheets
+                    .sheet_floorstyled_from_biome(&Biome::Olmec, self.classic_mode)
+                    .unwrap(),
+            );
+
+        let mut placed_egg = false;
 
         for (row_idx, row) in grid.iter().enumerate() {
             for (col_idx, tile) in row.iter().enumerate() {
@@ -438,18 +477,39 @@ impl GridRenderer {
                     PlacedTile::IdolAltarRight => {
                         place_tile(biome_sheet, 11, 0);
 
-                        let tile_image = sheets.items.view(
+                        let tile_image = sheets.get_items(self.classic_mode).view(
                             15 * TILE_WIDTH,
                             1 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        overlay(
-                            base_image,
-                            &tile_image,
-                            x - TILE_WIDTH / 2,
-                            y - TILE_HEIGHT + 18,
-                        );
+                        if *biome == Biome::Volcana && !placed_egg && rng.gen_bool(0.3) {
+                            let precious_image = &load_images(CHAR_PRECIOUS, CLASSIC_CHAR_PRECIOUS)
+                                [if self.classic_mode { 1 } else { 0 }];
+
+                            overlay(
+                                base_image,
+                                precious_image,
+                                x - TILE_WIDTH + 8,
+                                y - TILE_HEIGHT + 8,
+                            );
+
+                            overlay(
+                                base_image,
+                                &tile_image,
+                                x - TILE_WIDTH / 2,
+                                y - TILE_HEIGHT + 13,
+                            );
+
+                            placed_egg = true;
+                        } else {
+                            overlay(
+                                base_image,
+                                &tile_image,
+                                x - TILE_WIDTH / 2,
+                                y - TILE_HEIGHT + 18,
+                            );
+                        }
                     }
                     PlacedTile::EggplantAltarLeft => {
                         place_tile(biome_sheet, 11, 2);
@@ -532,6 +592,15 @@ impl GridRenderer {
                         place_tile(biome_sheet, 10, 2);
                     }
                     PlacedTile::IceBlock => {
+                        if !placed_egg && rng.gen_bool(0.2) {
+                            let beg_image = &load_images(CHAR_BEG, CLASSIC_CHAR_BEG)
+                                [if self.classic_mode { 1 } else { 0 }];
+
+                            overlay(base_image, beg_image, x, y);
+
+                            placed_egg = true;
+                        }
+
                         let tile_image = biome_sheet.view(
                             7 * TILE_WIDTH,
                             1 * TILE_HEIGHT,
@@ -541,11 +610,16 @@ impl GridRenderer {
                         let tile_image = DynamicImage::ImageRgba8(tile_image.to_image());
 
                         let overlap = 8;
-                        let tile_image = tile_image.resize(
+                        let mut tile_image = tile_image.resize(
                             TILE_WIDTH + overlap,
                             TILE_HEIGHT + overlap,
                             FilterType::CatmullRom,
                         );
+                        tile_image
+                            .as_mut_rgba8()
+                            .unwrap()
+                            .pixels_mut()
+                            .for_each(|p| p[3] = p[2]);
                         overlay(base_image, &tile_image, x - overlap / 2, y - overlap / 2);
                     }
                     PlacedTile::ChainTop => {
@@ -621,7 +695,13 @@ impl GridRenderer {
                         }
                     }
                     PlacedTile::UdjatSocketBot => {
-                        place_tile(&sheets.floorstyled_babylon, 7, 2);
+                        place_tile(
+                            &sheets
+                                .sheet_floorstyled_from_biome(&Biome::Babylon, self.classic_mode)
+                                .unwrap(),
+                            7,
+                            2,
+                        );
                     }
                     PlacedTile::ConveyorLeft => {
                         place_tile(biome_sheet, 11, 11);
@@ -632,7 +712,9 @@ impl GridRenderer {
                     PlacedTile::PushBlock => {
                         let sheet = match biome {
                             Biome::CityOfGold | Biome::Duat => floorstyled_biome_sheet,
-                            Biome::Surface => &sheets.floor_cave,
+                            Biome::Surface => sheets
+                                .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                                .unwrap(),
                             _ => biome_sheet,
                         };
                         let (ix, iy) = match biome {
@@ -645,7 +727,7 @@ impl GridRenderer {
                         place_tile(floormisc, 2, 2);
                     }
                     PlacedTile::HoneyUp => {
-                        let tile_image = sheets.items.view(
+                        let tile_image = sheets.get_items(self.classic_mode).view(
                             14 * TILE_WIDTH,
                             14 * TILE_HEIGHT,
                             TILE_WIDTH,
@@ -654,7 +736,7 @@ impl GridRenderer {
                         overlay(base_image, &tile_image, x, y - 22);
                     }
                     PlacedTile::HoneyDown => {
-                        let tile_image = sheets.items.view(
+                        let tile_image = sheets.get_items(self.classic_mode).view(
                             13 * TILE_WIDTH,
                             14 * TILE_HEIGHT,
                             TILE_WIDTH,
@@ -677,7 +759,9 @@ impl GridRenderer {
         rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
-        let sheet_image = sheets.sheet_floor_from_biome(biome).unwrap();
+        let sheet_image = sheets
+            .sheet_floor_from_biome(biome, self.classic_mode)
+            .unwrap();
 
         let right_deco = vec![
             sheet_image.view(5 * TILE_WIDTH, 5 * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
@@ -791,13 +875,16 @@ impl GridRenderer {
                         }
                     }
                     PlacedTile::BoneBlock => {
-                        let left_deco = sheets.floor_cave.view(
+                        let floor_cave = sheets
+                            .sheet_floor_from_biome(&Biome::Cave, self.classic_mode)
+                            .unwrap();
+                        let left_deco = floor_cave.view(
                             10 * TILE_WIDTH,
                             3 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        let right_deco = sheets.floor_cave.view(
+                        let right_deco = floor_cave.view(
                             11 * TILE_WIDTH,
                             3 * TILE_HEIGHT,
                             TILE_WIDTH,
@@ -816,7 +903,7 @@ impl GridRenderer {
                             Some(PlacedTile::BoneBlock),
                         );
                         if up_empty || up_bone {
-                            let up_deco = sheets.floor_cave.view(
+                            let up_deco = floor_cave.view(
                                 11 * TILE_WIDTH,
                                 2 * TILE_HEIGHT,
                                 TILE_WIDTH,
@@ -825,13 +912,14 @@ impl GridRenderer {
                             overlay(base_image, &up_deco, x, y - (TILE_HEIGHT / 2));
                         }
                         if up_empty && rng.gen_bool(0.5) {
-                            let ribcage = sheets.items.view(
+                            let items = sheets.get_items(self.classic_mode);
+                            let ribcage = items.view(
                                 14 * TILE_WIDTH,
                                 3 * TILE_HEIGHT,
                                 TILE_WIDTH,
                                 TILE_HEIGHT,
                             );
-                            let skull = sheets.items.view(
+                            let skull = items.view(
                                 15 * TILE_WIDTH,
                                 3 * TILE_HEIGHT,
                                 TILE_WIDTH,
@@ -842,19 +930,22 @@ impl GridRenderer {
                         }
                     }
                     PlacedTile::BushBlock => {
-                        let left_deco = sheets.floor_jungle.view(
+                        let floor_jungle = sheets
+                            .sheet_floor_from_biome(&Biome::Jungle, self.classic_mode)
+                            .unwrap();
+                        let left_deco = floor_jungle.view(
                             10 * TILE_WIDTH,
                             3 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        let right_deco = sheets.floor_jungle.view(
+                        let right_deco = floor_jungle.view(
                             11 * TILE_WIDTH,
                             3 * TILE_HEIGHT,
                             TILE_WIDTH,
                             TILE_HEIGHT,
                         );
-                        let down_deco = sheets.floor_jungle.view(
+                        let down_deco = floor_jungle.view(
                             10 * TILE_WIDTH,
                             4 * TILE_HEIGHT,
                             TILE_WIDTH,
@@ -874,7 +965,7 @@ impl GridRenderer {
                                 Some(PlacedTile::BushBlock),
                             );
                         if up {
-                            let up_deco = sheets.floor_jungle.view(
+                            let up_deco = floor_jungle.view(
                                 11 * TILE_WIDTH,
                                 2 * TILE_HEIGHT,
                                 TILE_WIDTH,
@@ -897,29 +988,17 @@ impl GridRenderer {
         rng: &mut StdRng,
         grid: &PlacedTileGrid,
     ) {
+        let items = sheets.get_items(self.classic_mode);
         let crust_gold = vec![
-            sheets
-                .items
-                .view(TILE_WIDTH * 10, 0, TILE_WIDTH, TILE_HEIGHT),
-            sheets
-                .items
-                .view(TILE_WIDTH * 11, 0, TILE_WIDTH, TILE_HEIGHT),
+            items.view(TILE_WIDTH * 10, 0, TILE_WIDTH, TILE_HEIGHT),
+            items.view(TILE_WIDTH * 11, 0, TILE_WIDTH, TILE_HEIGHT),
         ];
         let crust_jewels = vec![
-            sheets
-                .items
-                .view(TILE_WIDTH * 3, 0, TILE_WIDTH, TILE_HEIGHT),
-            sheets
-                .items
-                .view(TILE_WIDTH * 4, 0, TILE_WIDTH, TILE_HEIGHT),
-            sheets
-                .items
-                .view(TILE_WIDTH * 5, 0, TILE_WIDTH, TILE_HEIGHT),
+            items.view(TILE_WIDTH * 3, 0, TILE_WIDTH, TILE_HEIGHT),
+            items.view(TILE_WIDTH * 4, 0, TILE_WIDTH, TILE_HEIGHT),
+            items.view(TILE_WIDTH * 5, 0, TILE_WIDTH, TILE_HEIGHT),
         ];
-        let crust_jetpack =
-            sheets
-                .items
-                .view(TILE_WIDTH * 9, TILE_HEIGHT * 2, TILE_WIDTH, TILE_HEIGHT);
+        let crust_jetpack = items.view(TILE_WIDTH * 9, TILE_HEIGHT * 2, TILE_WIDTH, TILE_HEIGHT);
 
         for (row_idx, row) in config.grid.iter().enumerate() {
             for (col_idx, col) in row.iter().enumerate() {

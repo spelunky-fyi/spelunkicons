@@ -50,8 +50,6 @@ impl Generator {
     }
 
     pub fn make_png(&self, config: Spelunkicon) -> Option<Vec<u8>> {
-        // Generate Image
-
         let image_height = config.grid_height as u32 * TILE_HEIGHT;
         let image_width = config.grid_width as u32 * TILE_WIDTH;
 
@@ -59,20 +57,19 @@ impl Generator {
         let mut rng = StdRng::seed_from_u64(config.hash as u64);
         let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
-        match config.egg.as_deref() {
-            Option::Some("pride") => {
-                GenSheet::new(GenKind::Pride, Biome::Cave).generate_image(
-                    &mut image,
-                    &self.sheets,
-                    &config,
-                    &mut rng,
-                );
-            }
-            _ => {
-                let sheet = &self.sheet_gens[sheet_idx];
-                sheet.generate_image(&mut image, &self.sheets, &config, &mut rng);
-            }
-        };
+        let egg = config.egg.clone().unwrap_or_else(Vec::<String>::new);
+
+        // Note intentionally doing rng first so that the manual classic mode has same rng as random classic mode
+        let classic_mode = rng.gen_bool(0.01) || egg.contains(&String::from("classic"));
+
+        // Generate Image
+        if egg.contains(&String::from("pride")) {
+            let sheet = GenSheet::new(GenKind::Pride, Biome::Cave);
+            sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
+        } else {
+            let sheet = &self.sheet_gens[sheet_idx];
+            sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
+        }
 
         let image = resize(
             &image,
@@ -80,6 +77,7 @@ impl Generator {
             OUTPUT_DIMENSION,
             FilterType::Nearest,
         );
+
         // Convert to PNG
         let mut out = Vec::new();
         let png = PngEncoder::new(&mut out).encode(
