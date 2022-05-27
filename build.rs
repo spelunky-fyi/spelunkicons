@@ -47,6 +47,11 @@ static PNGS: &'static [(&str, &str, Option<(u32, u32, u32, u32)>)] = &[
     ("FLOORMISC", "floormisc.png", Option::None),
     ("BASECAMP_DECO", "deco_basecamp.png", Option::None),
     ("ITEMS", "items.png", Option::None),
+    (
+        "CHAR_BEG",
+        "monstersbasic03.png",
+        Option::Some((6 * 128, 4 * 128, 128, 128)),
+    ),
 ];
 
 fn main() {

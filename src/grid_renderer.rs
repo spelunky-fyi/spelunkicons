@@ -447,6 +447,8 @@ impl GridRenderer {
                     .unwrap(),
             );
 
+        let mut placed_egg = false;
+
         for (row_idx, row) in grid.iter().enumerate() {
             for (col_idx, tile) in row.iter().enumerate() {
                 let x = col_idx as u32 * TILE_HEIGHT as u32;
@@ -569,6 +571,22 @@ impl GridRenderer {
                         place_tile(biome_sheet, 10, 2);
                     }
                     PlacedTile::IceBlock => {
+                        if !placed_egg && rng.gen_bool(0.2) {
+                            let beg_image = load_from_memory_with_format(
+                                if self.classic_mode {
+                                    CLASSIC_CHAR_BEG
+                                } else {
+                                    CHAR_BEG
+                                },
+                                Png,
+                            )
+                            .unwrap();
+
+                            overlay(base_image, &beg_image, x, y);
+
+                            placed_egg = true;
+                        }
+
                         let tile_image = biome_sheet.view(
                             7 * TILE_WIDTH,
                             1 * TILE_HEIGHT,
@@ -578,11 +596,16 @@ impl GridRenderer {
                         let tile_image = DynamicImage::ImageRgba8(tile_image.to_image());
 
                         let overlap = 8;
-                        let tile_image = tile_image.resize(
+                        let mut tile_image = tile_image.resize(
                             TILE_WIDTH + overlap,
                             TILE_HEIGHT + overlap,
                             FilterType::CatmullRom,
                         );
+                        tile_image
+                            .as_mut_rgba8()
+                            .unwrap()
+                            .pixels_mut()
+                            .for_each(|p| p[3] = p[2]);
                         overlay(base_image, &tile_image, x - overlap / 2, y - overlap / 2);
                     }
                     PlacedTile::ChainTop => {
