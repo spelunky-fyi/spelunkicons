@@ -57,21 +57,19 @@ impl Generator {
         let mut rng = StdRng::seed_from_u64(config.hash as u64);
         let sheet_idx = rng.gen::<usize>() % self.sheet_gens.len();
 
+        let egg = config.egg.clone().unwrap_or_else(Vec::<String>::new);
+
         // Note intentionally doing rng first so that the manual classic mode has same rng as random classic mode
-        let classic_mode =
-            rng.gen_bool(0.01) || config.egg == Option::Some(String::from("classic"));
+        let classic_mode = rng.gen_bool(0.01) || egg.contains(&String::from("classic"));
 
         // Generate Image
-        match config.egg.as_deref() {
-            Option::Some("pride") => {
-                let sheet = GenSheet::new(GenKind::Pride, Biome::Cave);
-                sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
-            }
-            _ => {
-                let sheet = &self.sheet_gens[sheet_idx];
-                sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
-            }
-        };
+        if egg.contains(&String::from("pride")) {
+            let sheet = GenSheet::new(GenKind::Pride, Biome::Cave);
+            sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
+        } else {
+            let sheet = &self.sheet_gens[sheet_idx];
+            sheet.generate_image(&mut image, &self.sheets, &config, classic_mode, &mut rng);
+        }
 
         let image = resize(
             &image,

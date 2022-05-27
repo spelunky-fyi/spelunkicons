@@ -1,10 +1,11 @@
-use std::collections::HashMap;
 use std::convert::Infallible;
 use std::future::Future;
 use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
+
+use multimap::MultiMap;
 
 use hyper::header::{HeaderValue, CONTENT_TYPE};
 use hyper::service::Service;
@@ -72,7 +73,7 @@ impl Service<Request<Body>> for IconService {
             return Box::pin(async { Ok(response) });
         }
 
-        let params: HashMap<String, String> = req
+        let params: MultiMap<String, String> = req
             .uri()
             .query()
             .map(|v| {
@@ -80,7 +81,7 @@ impl Service<Request<Body>> for IconService {
                     .into_owned()
                     .collect()
             })
-            .unwrap_or_else(HashMap::new);
+            .unwrap_or_else(MultiMap::new);
 
         let size = params
             .get("size")
@@ -105,7 +106,7 @@ impl Service<Request<Body>> for IconService {
             }
         };
 
-        let egg = params.get("egg").cloned();
+        let egg = params.get_vec("egg").cloned();
 
         // Generate the PNG
         let config = Spelunkicon::from_input(&input, egg, size, max_misc);
