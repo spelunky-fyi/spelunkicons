@@ -33,3 +33,4 @@ url = "2.2.2"
 
 [build-dependencies]
 image = "0.23.14"
+num-rational = "0.4.0"

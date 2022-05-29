@@ -1,14 +1,17 @@
 use std::env;
 use std::fs;
 use std::fs::File;
-use std::io::{BufReader, Cursor, Read, Write};
+use std::io::{BufReader, Cursor, Write};
 use std::path::Path;
 use std::path::PathBuf;
 
 use image::ImageFormat::Png;
-use image::{load_from_memory_with_format, DynamicImage, GenericImageView};
+use image::{load, DynamicImage, GenericImageView};
 
-static PNGS: &'static [(&str, &str, Option<(u32, u32, u32, u32)>)] = &[
+use num_rational::Ratio;
+type Ru32 = Ratio<u32>;
+
+static PNGS: &'static [(&str, &str, Option<(Ru32, Ru32, Ru32, Ru32)>)] = &[
     ("FLOOR_CAVE", "floor_cave.png", Option::None),
     ("FLOOR_JUNGLE", "floor_jungle.png", Option::None),
     ("FLOOR_BABYLON", "floor_babylon.png", Option::None),
@@ -50,12 +53,22 @@ static PNGS: &'static [(&str, &str, Option<(u32, u32, u32, u32)>)] = &[
     (
         "CHAR_PRECIOUS",
         "monstersbasic02.png",
-        Option::Some((1 * 128, 7 * 128, 128, 128)),
+        Option::Some((
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(7, 16),
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(1, 16),
+        )),
     ),
     (
         "CHAR_BEG",
         "monstersbasic03.png",
-        Option::Some((6 * 128, 4 * 128, 128, 128)),
+        Option::Some((
+            Ru32::new_raw(6, 16),
+            Ru32::new_raw(4, 16),
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(1, 16),
+        )),
     ),
 ];
 
@@ -76,25 +89,56 @@ fn main() {
 
     let mut out_file = File::create(&dest_path).unwrap();
 
+    let build_profile = env::var("PROFILE").unwrap();
+
+    let mut tile_width: Option<u32> = Option::None;
+
+    let load_image_from_file = |path: &PathBuf| {
+        let file = File::open(&path).unwrap_or_else(|err| {
+            panic!("Error opening file {}: {:?}", path.to_string_lossy(), err)
+        });
+        let reader = BufReader::new(file);
+        load(reader, Png).unwrap_or_else(|err| {
+            panic!("Error reading image {}: {:?}", path.to_string_lossy(), err)
+        })
+    };
+
     for (name, path, region) in PNGS {
         for (prefix, root) in &texture_roots {
+            let root = match build_profile.as_str() {
+                "debug" => {
+                    let low_res_root = root.join("LowRes");
+                    let new_root = if low_res_root.is_dir() {
+                        low_res_root
+                    } else {
+                        Path::new(root).to_path_buf()
+                    };
+                    new_root
+                }
+                _ => root.to_path_buf(),
+            };
+
             let path = root.join(path);
+
+            let name = format!("{}{}", prefix, name);
+            if name == "FLOOR_CAVE" {
+                let image = load_image_from_file(&path);
+                let (w, _h) = (image.width(), image.height());
+                let floor_cave_num_tiles: u32 = 12;
+                tile_width = Option::Some(w / floor_cave_num_tiles);
+            }
 
             match region {
                 Some(region) => {
-                    let bytes = {
-                        let file = File::open(&path).unwrap_or_else(|err| {
-                            panic!("Error opening file {}: {:?}", path.to_string_lossy(), err)
-                        });
-                        let mut reader = BufReader::new(file);
-                        let mut buffer = Vec::new();
-                        reader.read_to_end(&mut buffer).unwrap_or_else(|err| {
-                            panic!("Error reading file {}: {:?}", path.to_string_lossy(), err)
-                        });
-                        buffer
-                    };
-                    let image = load_from_memory_with_format(&bytes, Png).unwrap();
-                    let (x, y, w, h) = region.clone();
+                    let image = load_image_from_file(&path);
+                    let (w, h) = (image.width(), image.height());
+                    let (rx, ry, rw, rh) = &region;
+                    let (x, y, w, h) = (
+                        (rx * w).to_integer(),
+                        (ry * h).to_integer(),
+                        (rw * w).to_integer(),
+                        (rh * h).to_integer(),
+                    );
                     let subimage = DynamicImage::ImageRgba8(image.view(x, y, w, h).to_image());
 
                     let mut out_bytes: Vec<u8> = Vec::new();
@@ -104,8 +148,7 @@ fn main() {
                     out_file
                         .write(
                             format!(
-                                "pub static {}{}: &'static [u8; {}] = &{:?};\n",
-                                prefix,
+                                "pub static {}: &'static [u8; {}] = &{:?};\n",
                                 name,
                                 out_bytes.len(),
                                 out_bytes
@@ -126,8 +169,7 @@ fn main() {
                     out_file
                         .write(
                             format!(
-                                "pub static {}{}: &'static [u8; {}] = include_bytes!({:?});\n",
-                                prefix,
+                                "pub static {}: &'static [u8; {}] = include_bytes!({:?});\n",
                                 name,
                                 metadata.len(),
                                 &path
@@ -139,5 +181,16 @@ fn main() {
             }
         }
     }
+
+    out_file
+        .write(
+            format!(
+                "pub const TILE_WIDTH: u32 = {};\npub const TILE_HEIGHT: u32 = TILE_WIDTH;",
+                tile_width.unwrap_or(128)
+            )
+            .as_bytes(),
+        )
+        .unwrap();
+
     println!("cargo:rerun-if-changed=build.rs");
 }
