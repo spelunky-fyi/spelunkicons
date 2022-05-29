@@ -91,8 +91,7 @@ fn main() {
 
     let build_profile = env::var("PROFILE").unwrap();
 
-    let floor_cave_num_tiles: u32 = 12;
-    let mut tile_width: u32 = 128;
+    let mut tile_width: Option<u32> = Option::None;
 
     let load_image_from_file = |path: &PathBuf| {
         let file = File::open(&path).unwrap_or_else(|err| {
@@ -110,11 +109,6 @@ fn main() {
                 "debug" => {
                     let low_res_root = root.join("LowRes");
                     let new_root = if low_res_root.is_dir() {
-                        if name == &"FLOOR_CAVE" {
-                            let image = load_image_from_file(&low_res_root.join(path));
-                            let (w, _h) = (image.width(), image.height());
-                            tile_width = w / floor_cave_num_tiles;
-                        }
                         low_res_root
                     } else {
                         Path::new(root).to_path_buf()
@@ -125,6 +119,14 @@ fn main() {
             };
 
             let path = root.join(path);
+
+            let name = format!("{}{}", prefix, name);
+            if name == "FLOOR_CAVE" {
+                let image = load_image_from_file(&path);
+                let (w, _h) = (image.width(), image.height());
+                let floor_cave_num_tiles: u32 = 12;
+                tile_width = Option::Some(w / floor_cave_num_tiles);
+            }
 
             match region {
                 Some(region) => {
@@ -146,8 +148,7 @@ fn main() {
                     out_file
                         .write(
                             format!(
-                                "pub static {}{}: &'static [u8; {}] = &{:?};\n",
-                                prefix,
+                                "pub static {}: &'static [u8; {}] = &{:?};\n",
                                 name,
                                 out_bytes.len(),
                                 out_bytes
@@ -168,8 +169,7 @@ fn main() {
                     out_file
                         .write(
                             format!(
-                                "pub static {}{}: &'static [u8; {}] = include_bytes!({:?});\n",
-                                prefix,
+                                "pub static {}: &'static [u8; {}] = include_bytes!({:?});\n",
                                 name,
                                 metadata.len(),
                                 &path
@@ -186,7 +186,7 @@ fn main() {
         .write(
             format!(
                 "pub const TILE_WIDTH: u32 = {};\npub const TILE_HEIGHT: u32 = TILE_WIDTH;",
-                tile_width
+                tile_width.unwrap_or(128)
             )
             .as_bytes(),
         )
