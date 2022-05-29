@@ -8,7 +8,10 @@ use std::path::PathBuf;
 use image::ImageFormat::Png;
 use image::{load_from_memory_with_format, DynamicImage, GenericImageView};
 
-static PNGS: &'static [(&str, &str, Option<(u32, u32, u32, u32)>)] = &[
+use num_rational::Ratio;
+type Ru32 = Ratio<u32>;
+
+static PNGS: &'static [(&str, &str, Option<(Ru32, Ru32, Ru32, Ru32)>)] = &[
     ("FLOOR_CAVE", "floor_cave.png", Option::None),
     ("FLOOR_JUNGLE", "floor_jungle.png", Option::None),
     ("FLOOR_BABYLON", "floor_babylon.png", Option::None),
@@ -50,12 +53,22 @@ static PNGS: &'static [(&str, &str, Option<(u32, u32, u32, u32)>)] = &[
     (
         "CHAR_PRECIOUS",
         "monstersbasic02.png",
-        Option::Some((1 * 128, 7 * 128, 128, 128)),
+        Option::Some((
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(7, 16),
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(1, 16),
+        )),
     ),
     (
         "CHAR_BEG",
         "monstersbasic03.png",
-        Option::Some((6 * 128, 4 * 128, 128, 128)),
+        Option::Some((
+            Ru32::new_raw(6, 16),
+            Ru32::new_raw(4, 16),
+            Ru32::new_raw(1, 16),
+            Ru32::new_raw(1, 16),
+        )),
     ),
 ];
 
@@ -82,19 +95,15 @@ fn main() {
 
             match region {
                 Some(region) => {
-                    let bytes = {
-                        let file = File::open(&path).unwrap_or_else(|err| {
-                            panic!("Error opening file {}: {:?}", path.to_string_lossy(), err)
-                        });
-                        let mut reader = BufReader::new(file);
-                        let mut buffer = Vec::new();
-                        reader.read_to_end(&mut buffer).unwrap_or_else(|err| {
-                            panic!("Error reading file {}: {:?}", path.to_string_lossy(), err)
-                        });
-                        buffer
-                    };
-                    let image = load_from_memory_with_format(&bytes, Png).unwrap();
-                    let (x, y, w, h) = region.clone();
+                    let image = load_image_from_file(&path);
+                    let (w, h) = (image.width(), image.height());
+                    let (rx, ry, rw, rh) = &region;
+                    let (x, y, w, h) = (
+                        (rx * w).to_integer(),
+                        (ry * h).to_integer(),
+                        (rw * w).to_integer(),
+                        (rh * h).to_integer(),
+                    );
                     let subimage = DynamicImage::ImageRgba8(image.view(x, y, w, h).to_image());
 
                     let mut out_bytes: Vec<u8> = Vec::new();
