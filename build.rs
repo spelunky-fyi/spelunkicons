@@ -1,12 +1,12 @@
 use std::env;
 use std::fs;
 use std::fs::File;
-use std::io::{BufReader, Cursor, Read, Write};
+use std::io::{BufReader, Cursor, Write};
 use std::path::Path;
 use std::path::PathBuf;
 
 use image::ImageFormat::Png;
-use image::{load_from_memory_with_format, DynamicImage, GenericImageView};
+use image::{load, DynamicImage, GenericImageView};
 
 use num_rational::Ratio;
 type Ru32 = Ratio<u32>;
@@ -89,8 +89,41 @@ fn main() {
 
     let mut out_file = File::create(&dest_path).unwrap();
 
+    let build_profile = env::var("PROFILE").unwrap();
+
+    let floor_cave_num_tiles: u32 = 12;
+    let mut tile_width: u32 = 128;
+
+    let load_image_from_file = |path: &PathBuf| {
+        let file = File::open(&path).unwrap_or_else(|err| {
+            panic!("Error opening file {}: {:?}", path.to_string_lossy(), err)
+        });
+        let reader = BufReader::new(file);
+        load(reader, Png).unwrap_or_else(|err| {
+            panic!("Error reading image {}: {:?}", path.to_string_lossy(), err)
+        })
+    };
+
     for (name, path, region) in PNGS {
         for (prefix, root) in &texture_roots {
+            let root = match build_profile.as_str() {
+                "debug" => {
+                    let low_res_root = root.join("LowRes");
+                    let new_root = if low_res_root.is_dir() {
+                        if name == &"FLOOR_CAVE" {
+                            let image = load_image_from_file(&low_res_root.join(path));
+                            let (w, _h) = (image.width(), image.height());
+                            tile_width = w / floor_cave_num_tiles;
+                        }
+                        low_res_root
+                    } else {
+                        Path::new(root).to_path_buf()
+                    };
+                    new_root
+                }
+                _ => root.to_path_buf(),
+            };
+
             let path = root.join(path);
 
             match region {
@@ -148,5 +181,16 @@ fn main() {
             }
         }
     }
+
+    out_file
+        .write(
+            format!(
+                "pub const TILE_WIDTH: u32 = {};\npub const TILE_HEIGHT: u32 = TILE_WIDTH;",
+                tile_width
+            )
+            .as_bytes(),
+        )
+        .unwrap();
+
     println!("cargo:rerun-if-changed=build.rs");
 }
