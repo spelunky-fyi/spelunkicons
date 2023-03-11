@@ -1,0 +1,10 @@
+[Unit]
+Description=Spelunkicons
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStart=/opt/spelunkicons
+
+[Install]
+WantedBy=default.target
